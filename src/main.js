@@ -20,8 +20,6 @@ const lightboxClose = document.querySelector(".lightbox-close");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
 const coverStartScale = 1.8;
-const coverStartRotateX = 5;
-const coverStartRotateY = -8;
 const coverAvatarAspect = 1500 / 2066;
 const coverFinalAvatarOffset = 28;
 
@@ -118,22 +116,6 @@ function coverStartMaskHeight() {
 
 function coverFinalMaskHeight() {
 	return `${window.innerHeight}px`;
-}
-
-function coverStartOffsetX() {
-	return -clamp(window.innerWidth * 0.045, 28, 72);
-}
-
-function coverStartOffsetY() {
-	return -clamp(window.innerHeight * 0.04, 20, 44);
-}
-
-function coverContentStartOffsetX() {
-	return -coverStartOffsetX() / coverStartScale - clamp(window.innerWidth * 0.016, 16, 24);
-}
-
-function coverContentStartOffsetY() {
-	return -coverStartOffsetY() / coverStartScale - 2;
 }
 
 function resetCoverAvatarLayout() {
@@ -236,21 +218,21 @@ function initStoryTimeline() {
 			gsap.set(".cover-section", { autoAlpha: 1 });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
-				x: coverStartOffsetX(),
-				y: coverStartOffsetY(),
+				x: 0,
+				y: 0,
 				scale: coverStartScale,
-				rotateX: coverStartRotateX,
-				rotateY: coverStartRotateY,
+				rotateX: 0,
+				rotateY: 0,
 				rotation: 0,
 				transformPerspective: 1200,
 				"--cover-mask-height": coverStartMaskHeight()
 			});
 			gsap.set(".cover-content", {
-				x: coverContentStartOffsetX(),
-				y: coverContentStartOffsetY(),
+				x: 0,
+				y: 0,
 				scale: 1 / coverStartScale,
-				rotateX: -coverStartRotateX,
-				rotateY: -coverStartRotateY,
+				rotateX: 0,
+				rotateY: 0,
 				rotation: 0,
 				transformOrigin: "50% 50%"
 			});
@@ -396,21 +378,21 @@ function initReducedStory() {
 	gsap.set(".cover-section", { autoAlpha: 1 });
 	gsap.set(".cover-scene", {
 		autoAlpha: 1,
-		x: coverStartOffsetX(),
-		y: coverStartOffsetY(),
+		x: 0,
+		y: 0,
 		scale: coverStartScale,
-		rotateX: coverStartRotateX,
-		rotateY: coverStartRotateY,
+		rotateX: 0,
+		rotateY: 0,
 		rotation: 0,
 		transformPerspective: 1200,
 		"--cover-mask-height": coverStartMaskHeight()
 	});
 	gsap.set(".cover-content", {
-		x: coverContentStartOffsetX(),
-		y: coverContentStartOffsetY(),
+		x: 0,
+		y: 0,
 		scale: 1 / coverStartScale,
-		rotateX: -coverStartRotateX,
-		rotateY: -coverStartRotateY,
+		rotateX: 0,
+		rotateY: 0,
 		rotation: 0,
 		transformOrigin: "50% 50%"
 	});
