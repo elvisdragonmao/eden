@@ -311,7 +311,6 @@ function initStoryTimeline() {
 
 			tl.to({}, { duration: 1 }, 0);
 			tl.set(".about-section", { autoAlpha: 1 }, 0.14);
-			tl.to(".about-section", { "--about-grid-opacity": 1, duration: 0.18 }, 0.14);
 			tl.to(
 				".cover-scene",
 				{

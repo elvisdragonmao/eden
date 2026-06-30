@@ -182,7 +182,7 @@ button {
 	align-items: center;
 	justify-content: center;
 	width: 48px;
-	gap: 24px;
+	gap: 40px;
 	color: var(--chrome-icon-color);
 	border-right: var(--chrome-width) solid var(--chrome-line);
 	pointer-events: auto;
@@ -394,23 +394,6 @@ button {
 	min-height: 100svh;
 	background: #fff;
 	opacity: 0;
-	--about-grid-opacity: 0;
-}
-
-.about-section::before {
-	position: absolute;
-	inset: -4svh -4vw;
-	content: "";
-	background-image: linear-gradient(rgba(0, 49, 99, 0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 49, 99, 0.11) 1px, transparent 1px);
-	background-position:
-		calc(50% + var(--mx) * 18px) calc(50% + var(--my) * 14px),
-		calc(50% + var(--mx) * 18px) calc(50% + var(--my) * 14px);
-	background-size: 48px 48px;
-	opacity: var(--about-grid-opacity);
-	pointer-events: none;
-	transform: translate3d(calc(var(--mx) * 8px), calc(var(--my) * 6px), 0);
-	transition: opacity 0.2s linear;
-	will-change: opacity, transform;
 }
 
 .about-shell {
@@ -430,6 +413,9 @@ button {
 }
 
 .about-title p {
+	display: flex;
+	align-items: baseline;
+	gap: 0;
 	margin: 0;
 	font-size: clamp(48px, 4.3vw, 65px);
 	font-weight: 400;
@@ -528,9 +514,7 @@ button {
 	--head-mask-size: 100%;
 	width: clamp(216px, 16.9vw, 255px);
 	aspect-ratio: 255 / 255;
-	background:
-		linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)),
-		url("/img/cover-bg.webp") center / cover;
+	background: #fff;
 	mask-size: var(--head-mask-size) var(--head-mask-size);
 	-webkit-mask-size: var(--head-mask-size) var(--head-mask-size);
 	transition:
@@ -538,6 +522,19 @@ button {
 		mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
 		-webkit-mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 	will-change: transform, opacity;
+}
+
+.about-head::before {
+	position: absolute;
+	inset: -18%;
+	z-index: 0;
+	content: "";
+	background:
+		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+		url("/img/commission-bg.webp") center / cover;
+	transform: scale(1.08);
+	transform-origin: center;
+	transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .about-head:hover {
@@ -552,7 +549,13 @@ button {
 }
 
 .about-head img {
+	position: relative;
+	z-index: 1;
 	transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-head:hover::before {
+	transform: scale(1.16);
 }
 
 .about-head:hover img {
