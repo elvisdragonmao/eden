@@ -22,6 +22,7 @@ let galleryMarqueeActive = false;
 let syncCoverParallaxProgress = () => {};
 const coverMaskAspect = 533 / 806;
 const coverAvatarAspect = 1500 / 2066;
+const portalMaskAspect = 533 / 806;
 const coverFinalAvatarOffset = 28;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -182,6 +183,18 @@ function alignToElement(fromSelector, toSelector, axis) {
 	};
 }
 
+function alignToViewportCenter(fromSelector, axis) {
+	return () => {
+		const from = baseRect(document.querySelector(fromSelector));
+		if (!from) return 0;
+
+		if (axis === "x") return window.innerWidth / 2 - (from.left + from.width / 2);
+		if (axis === "y") return window.innerHeight / 2 - (from.top + from.height / 2);
+
+		return 0;
+	};
+}
+
 function scaleToElementHeight(fromSelector, toSelector) {
 	return () => {
 		const from = baseRect(document.querySelector(fromSelector));
@@ -189,6 +202,99 @@ function scaleToElementHeight(fromSelector, toSelector) {
 		if (!from || !to) return 1;
 
 		return to.height / from.height;
+	};
+}
+
+function scaleToCoverViewport(fromSelector, overscan = 1.12) {
+	return () => {
+		const from = baseRect(document.querySelector(fromSelector));
+		if (!from) return 1;
+
+		return Math.max(window.innerWidth / from.width, window.innerHeight / from.height) * overscan;
+	};
+}
+
+function rectCenter(rect) {
+	return {
+		cx: rect.left + rect.width / 2,
+		cy: rect.top + rect.height / 2,
+		width: rect.width,
+		height: rect.height
+	};
+}
+
+function aboutHeadPortalRect() {
+	const rect = baseRect(document.querySelector(".about-head"));
+	if (rect) return rectCenter(rect);
+
+	return {
+		cx: window.innerWidth / 2,
+		cy: window.innerHeight / 2,
+		width: 240,
+		height: 240
+	};
+}
+
+function fullPortalRect() {
+	const height = Math.max(window.innerHeight * 1.18, (window.innerWidth * 1.18) / portalMaskAspect);
+
+	return {
+		cx: window.innerWidth / 2,
+		cy: window.innerHeight / 2,
+		width: height * portalMaskAspect,
+		height
+	};
+}
+
+function pinchedFullPortalRect() {
+	const rect = fullPortalRect();
+
+	return {
+		...rect,
+		width: Math.max(14, rect.width * 0.035)
+	};
+}
+
+function exitCoverPortalRect() {
+	const width = Math.min(window.innerWidth * 0.62, window.innerHeight * portalMaskAspect * 0.84);
+	const height = width / portalMaskAspect;
+
+	return {
+		cx: window.innerWidth * 0.53,
+		cy: window.innerHeight * 0.5,
+		width,
+		height
+	};
+}
+
+function exitFlyPortalRect() {
+	const rect = exitCoverPortalRect();
+
+	return {
+		...rect,
+		cx: window.innerWidth * 0.58,
+		cy: -rect.height * 0.16
+	};
+}
+
+function portalVars(rectGetter, { rotation = 0 } = {}) {
+	const readRect = () => rectGetter();
+
+	return {
+		"--portal-left": () => {
+			const rect = readRect();
+			return `${rect.cx - rect.width / 2}px`;
+		},
+		"--portal-top": () => {
+			const rect = readRect();
+			return `${rect.cy - rect.height / 2}px`;
+		},
+		"--portal-width": () => `${readRect().width}px`,
+		"--portal-height": () => `${readRect().height}px`,
+		"--portal-origin-x": () => `${readRect().cx}px`,
+		"--portal-origin-y": () => `${readRect().cy}px`,
+		"--portal-rotation": () => `${rotation}deg`,
+		"--portal-world-rotation": () => `${-rotation}deg`
 	};
 }
 
@@ -267,10 +373,12 @@ function initStoryTimeline() {
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
 			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
+			gsap.set(".commission-bg", { autoAlpha: 0 });
 			gsap.set(".commission-copy", { autoAlpha: 0, y: 36 });
+			gsap.set(".commission-portal", { autoAlpha: 0, ...portalVars(aboutHeadPortalRect) });
 			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 28 });
 			gsap.set(".gallery-card", { autoAlpha: 0, y: 44 });
-			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 0, rotateY: -180, scale: 1 });
+			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 0, rotateY: 0, scale: 1 });
 			gsap.set(".commission-flip", {
 				autoAlpha: 0,
 				x: 0,
@@ -278,12 +386,14 @@ function initStoryTimeline() {
 				scaleX: 1,
 				scaleY: 1,
 				rotateX: 0,
+				rotateY: 0,
 				clipPath: "inset(0px round 32px)",
 				transformPerspective: mobile ? 1000 : 1200,
 				transformOrigin: "50% 50%"
 			});
 			gsap.set(".flip-card", {
 				rotateY: 0,
+				rotateX: 0,
 				transformPerspective: mobile ? 1000 : 1200,
 				transformOrigin: "50% 50%"
 			});
@@ -341,55 +451,71 @@ function initStoryTimeline() {
 			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
 			tl.to(".about-head", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.24);
 
-			tl.to(".commission-section", { autoAlpha: 1, duration: 0.12 }, 0.42);
-			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.44);
+			tl.to(".commission-section", { autoAlpha: 1, duration: 0.08 }, 0.42);
+			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.45);
 			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.42);
+			tl.set(".commission-flip", { autoAlpha: 1 }, 0.43);
 			tl.fromTo(
 				".commission-flip",
 				{
-					autoAlpha: 0,
 					x: alignToElement(".commission-flip", ".about-head", "x"),
 					y: alignToElement(".commission-flip", ".about-head", "y"),
 					scaleX: alignToElement(".commission-flip", ".about-head", "scaleX"),
 					scaleY: alignToElement(".commission-flip", ".about-head", "scaleY"),
-					rotateX: mobile ? -5 : -7
+					rotateX: 0,
+					rotateY: 0
 				},
 				{
-					autoAlpha: 1,
-					x: 0,
-					y: 0,
-					scaleX: 1,
-					scaleY: 1,
+					x: alignToViewportCenter(".commission-flip", "x"),
+					y: alignToViewportCenter(".commission-flip", "y"),
+					scaleX: scaleToCoverViewport(".commission-flip", mobile ? 1.18 : 1.12),
+					scaleY: scaleToCoverViewport(".commission-flip", mobile ? 1.18 : 1.12),
 					rotateX: 0,
-					duration: 0.16
+					rotateY: 180,
+					duration: 0.22
 				},
 				0.43
 			);
-			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.5);
-			tl.to(".commission-flip", { scaleX: 1.12, scaleY: 1.12, rotateX: mobile ? 6 : 8, duration: 0.18 }, 0.62);
-			tl.to(".flip-card", { rotateY: 180, duration: 0.18 }, 0.62);
-			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.1 }, 0.66);
-
-			tl.to(".gallery-section", { autoAlpha: 1, duration: 0.12 }, 0.75);
-			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.1 }, 0.78);
-			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.12 }, 0.82);
+			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), autoAlpha: 1 }, 0.54);
 			tl.to(
-				".commission-flip",
+				".commission-portal",
 				{
-					x: alignToElement(".commission-flip", ".gallery-card.is-transition", "x"),
-					y: alignToElement(".commission-flip", ".gallery-card.is-transition", "y"),
-					scaleX: alignToElement(".commission-flip", ".gallery-card.is-transition", "scaleX"),
-					scaleY: alignToElement(".commission-flip", ".gallery-card.is-transition", "scaleY"),
-					rotateX: 0,
-					clipPath: "inset(0px round 29px)",
+					...portalVars(fullPortalRect),
+					autoAlpha: 1,
 					duration: 0.16
 				},
-				0.8
+				0.54
 			);
-			tl.to(".flip-card", { rotateY: 360, duration: 0.16 }, 0.8);
-			tl.to(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, duration: 0.04 }, 0.935);
-			tl.to(".commission-flip", { autoAlpha: 0, duration: 0.04 }, 0.94);
-			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.92);
+			tl.to(".commission-flip", { autoAlpha: 0, duration: 0.05 }, 0.57);
+			tl.to(".commission-bg", { autoAlpha: 1, duration: 0.08 }, 0.62);
+			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.62);
+			tl.to(".commission-portal", { autoAlpha: 0, duration: 0.025 }, 0.705);
+
+			tl.set(".commission-portal", { ...portalVars(fullPortalRect), autoAlpha: 1 }, 0.735);
+			tl.to(".gallery-section", { autoAlpha: 1, duration: 0.08 }, 0.74);
+			tl.to(".commission-bg", { autoAlpha: 0, duration: 0.08 }, 0.755);
+			tl.to(".commission-copy", { autoAlpha: 0, y: -16, duration: 0.08 }, 0.755);
+			tl.to(
+				".commission-portal",
+				{
+					...portalVars(exitCoverPortalRect, { rotation: mobile ? -3 : -5 }),
+					duration: 0.14
+				},
+				0.755
+			);
+			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.1 }, 0.81);
+			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.12 }, 0.84);
+			tl.to(
+				".commission-portal",
+				{
+					...portalVars(exitFlyPortalRect, { rotation: mobile ? -6 : -9 }),
+					autoAlpha: 0,
+					duration: 0.15
+				},
+				0.86
+			);
+			tl.to(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, duration: 0.06 }, 0.9);
+			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.94);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
 			playInkSweep();

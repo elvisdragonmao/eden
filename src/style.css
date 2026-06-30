@@ -581,20 +581,26 @@ button {
 }
 
 .commission-section {
-	z-index: 3;
+	z-index: 5;
 	min-height: 100svh;
 	color: var(--violet-ink);
-	background: #f4b934;
+	background: #fff;
 	opacity: 0;
 	perspective: 1200px;
 }
 
-.commission-bg {
+.commission-bg,
+.commission-portal-bg {
 	background-image: url("/img/commission-bg.webp");
 	transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0) scale(1.04);
 }
 
-.commission-copy {
+.commission-bg {
+	z-index: 1;
+}
+
+.commission-copy,
+.commission-portal-copy {
 	position: absolute;
 	top: clamp(112px, 13.9vh, 137px);
 	left: clamp(88px, 9vw, 137px);
@@ -604,7 +610,8 @@ button {
 	will-change: transform, opacity;
 }
 
-.commission-copy h2 {
+.commission-copy h2,
+.commission-portal-copy h2 {
 	margin: 0 0 20px;
 	font-size: clamp(48px, 4.3vw, 65px);
 	font-weight: 400;
@@ -613,17 +620,59 @@ button {
 	white-space: nowrap;
 }
 
-.commission-copy p {
+.commission-copy p,
+.commission-portal-copy p {
 	margin: 0;
 	font-size: clamp(21px, 1.6vw, 24px);
 	line-height: 1.2;
+}
+
+.commission-portal {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	overflow: hidden;
+	opacity: 0;
+	pointer-events: none;
+	transform: rotate(var(--portal-rotation, 0deg));
+	transform-origin: var(--portal-origin-x, 50vw) var(--portal-origin-y, 50svh);
+	mask-image: url("/img/mask/mask-portrait.svg");
+	mask-mode: alpha;
+	mask-position: var(--portal-left, 50vw) var(--portal-top, 50svh);
+	mask-repeat: no-repeat;
+	mask-size: var(--portal-width, 0px) var(--portal-height, 0px);
+	-webkit-mask-image: url("/img/mask/mask-portrait.svg");
+	-webkit-mask-position: var(--portal-left, 50vw) var(--portal-top, 50svh);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: var(--portal-width, 0px) var(--portal-height, 0px);
+	will-change: opacity, transform, mask-position, mask-size;
+}
+
+.commission-portal-world {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	transform: rotate(var(--portal-world-rotation, 0deg));
+	transform-origin: var(--portal-origin-x, 50vw) var(--portal-origin-y, 50svh);
+	will-change: transform;
+}
+
+.commission-portal-bg {
+	position: absolute;
+	inset: 0;
+	background-position: center;
+	background-size: cover;
+}
+
+.commission-portal-copy {
+	z-index: 2;
 }
 
 .commission-flip {
 	position: absolute;
 	top: clamp(56px, 6.8vh, 67px);
 	left: calc(50% + 106.5px);
-	z-index: 2;
+	z-index: 6;
 	width: clamp(424px, 38vw, 575px);
 	height: clamp(624px, 86.3vh, 847px);
 	opacity: 0;
@@ -656,53 +705,9 @@ button {
 }
 
 .flip-front {
-	background: url("/img/cover-bg.webp") center / cover;
-}
-
-.flip-back {
-	display: grid;
-	place-items: center;
-	color: #000;
-	background: #fff;
-	transform: rotateY(180deg);
-	mask-image: url("/img/mask/mask-portrait.svg");
-	mask-repeat: no-repeat;
-	mask-position: center;
-	mask-size: 100% 100%;
-	-webkit-mask-image: url("/img/mask/mask-portrait.svg");
-	-webkit-mask-repeat: no-repeat;
-	-webkit-mask-position: center;
-	-webkit-mask-size: 100% 100%;
-}
-
-.flip-back-preview {
-	position: relative;
-	display: grid;
-	width: 100%;
-	height: 100%;
-	grid-template-columns: 1fr 1fr;
-	gap: 12px;
-	padding: 80px 56px;
 	background:
-		linear-gradient(rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.86)),
+		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
 		url("/img/commission-bg.webp") center / cover;
-}
-
-.flip-back-preview span {
-	position: absolute;
-	top: 44px;
-	left: 50%;
-	font-size: 56px;
-	line-height: 1;
-	transform: translateX(-50%);
-}
-
-.flip-back-preview img {
-	align-self: end;
-	width: 100%;
-	height: 70%;
-	object-fit: cover;
-	border-radius: 24px;
 }
 
 .gallery-section {
@@ -1142,24 +1147,28 @@ button {
 		min-height: max(874px, 100svh);
 	}
 
-	.commission-bg {
+	.commission-bg,
+	.commission-portal-bg {
 		background-position: center;
 		transform: scale(1.04);
 	}
 
-	.commission-copy {
+	.commission-copy,
+	.commission-portal-copy {
 		top: 126px;
 		left: 23px;
 		max-width: 384px;
 		color: #000;
 	}
 
-	.commission-copy h2 {
+	.commission-copy h2,
+	.commission-portal-copy h2 {
 		margin-bottom: 4px;
 		font-size: clamp(36px, 9.45vw, 38px);
 	}
 
-	.commission-copy p {
+	.commission-copy p,
+	.commission-portal-copy p {
 		font-size: 17px;
 	}
 
