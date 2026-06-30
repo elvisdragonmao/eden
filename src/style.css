@@ -222,17 +222,24 @@ button {
 	position: absolute;
 	inset: 0;
 	overflow: hidden;
-	--clip-top: 0px;
-	--clip-right: 0px;
-	--clip-bottom: 0px;
-	--clip-left: 0px;
+	--cover-mask-width: 180vw;
+	--cover-mask-height: 180vh;
 	background: #a7b6bb;
-	clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left) round 0px);
+	mask-image: url("/img/mask/mask-portrait.svg");
+	mask-mode: alpha;
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: var(--cover-mask-width) var(--cover-mask-height);
+	-webkit-mask-image: url("/img/mask/mask-portrait.svg");
+	-webkit-mask-position: center;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: var(--cover-mask-width) var(--cover-mask-height);
 	pointer-events: none;
 	perspective: clamp(840px, 72vw, 1320px);
 	perspective-origin: calc(50% + var(--mx) * 7%) calc(50% + var(--my) * 6%);
 	transform-style: preserve-3d;
-	will-change: clip-path, opacity, transform;
+	transform-origin: 50% 50%;
+	will-change: mask-size, opacity, transform;
 }
 
 .cover-bg,
@@ -533,6 +540,8 @@ button {
 	width: clamp(420px, 35.3vw, 533px);
 	height: clamp(640px, 82.1vh, 806px);
 	background: url("/img/cover-bg.webp") center / cover;
+	opacity: 0;
+	pointer-events: none;
 	will-change: transform, opacity, mask-size;
 }
 

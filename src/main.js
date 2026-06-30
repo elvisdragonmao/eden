@@ -107,23 +107,6 @@ function baseRect(element) {
 	return rect;
 }
 
-function clipInsetValue(selector, side) {
-	return () => {
-		const target = document.querySelector(selector);
-		const rect = baseRect(target);
-		if (!rect) return "0px";
-
-		const values = {
-			top: Math.max(0, rect.top),
-			right: Math.max(0, window.innerWidth - rect.right),
-			bottom: Math.max(0, window.innerHeight - rect.bottom),
-			left: Math.max(0, rect.left)
-		};
-
-		return `${values[side].toFixed(2)}px`;
-	};
-}
-
 function alignToElement(fromSelector, toSelector, axis) {
 	return () => {
 		const from = baseRect(document.querySelector(fromSelector));
@@ -190,10 +173,12 @@ function initStoryTimeline() {
 			gsap.set(".cover-section", { autoAlpha: 1 });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
-				"--clip-top": "0px",
-				"--clip-right": "0px",
-				"--clip-bottom": "0px",
-				"--clip-left": "0px"
+				x: 0,
+				y: 0,
+				scaleX: 1,
+				scaleY: 1,
+				"--cover-mask-width": "180vw",
+				"--cover-mask-height": "180vh"
 			});
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
@@ -240,29 +225,29 @@ function initStoryTimeline() {
 			});
 
 			tl.to({}, { duration: 1 }, 0);
-			tl.to(".about-section", { autoAlpha: 1, duration: 0.12 }, 0.08);
+			tl.set(".about-section", { autoAlpha: 1 }, 0.08);
 			tl.to(".about-section", { "--about-grid-opacity": 1, duration: 0.18 }, 0.1);
 			tl.to(
 				".cover-scene",
 				{
-					"--clip-top": clipInsetValue(".about-portrait", "top"),
-					"--clip-right": clipInsetValue(".about-portrait", "right"),
-					"--clip-bottom": clipInsetValue(".about-portrait", "bottom"),
-					"--clip-left": clipInsetValue(".about-portrait", "left"),
-					duration: 0.22
+					x: alignToElement(".cover-scene", ".about-portrait", "x"),
+					y: alignToElement(".cover-scene", ".about-portrait", "y"),
+					scaleX: alignToElement(".cover-scene", ".about-portrait", "scaleX"),
+					scaleY: alignToElement(".cover-scene", ".about-portrait", "scaleY"),
+					duration: 0.24
 				},
 				0.1
 			);
+			tl.to(".cover-scene", { "--cover-mask-width": "100%", "--cover-mask-height": "100%", duration: 0.1 }, 0.1);
 			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
 			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, 0.24);
 			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
 			tl.to(".about-head", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.24);
-			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.06 }, 0.28);
 
 			tl.to(".commission-section", { autoAlpha: 1, duration: 0.12 }, 0.42);
 			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.44);
-			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.44);
+			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.42);
 			tl.fromTo(
 				".commission-flip",
 				{
@@ -322,10 +307,12 @@ function initReducedStory() {
 	gsap.set(".cover-section", { autoAlpha: 1 });
 	gsap.set(".cover-scene", {
 		autoAlpha: 1,
-		"--clip-top": "0px",
-		"--clip-right": "0px",
-		"--clip-bottom": "0px",
-		"--clip-left": "0px"
+		x: 0,
+		y: 0,
+		scaleX: 1,
+		scaleY: 1,
+		"--cover-mask-width": "180vw",
+		"--cover-mask-height": "180vh"
 	});
 }
 
