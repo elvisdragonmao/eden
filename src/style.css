@@ -220,26 +220,39 @@ button {
 
 .cover-scene {
 	position: absolute;
-	inset: 0;
+	top: 0;
+	bottom: 0;
+	left: calc((100vw - var(--cover-scene-width)) / 2);
+	width: var(--cover-scene-width);
 	overflow: hidden;
-	--cover-mask-width: 180vw;
-	--cover-mask-height: 180vh;
+	--cover-scene-width: max(100vw, 66.13svh);
+	--cover-mask-height: max(460vh, 300vw);
 	background: #a7b6bb;
 	mask-image: url("/img/mask/mask-portrait.svg");
 	mask-mode: alpha;
 	mask-position: center;
 	mask-repeat: no-repeat;
-	mask-size: var(--cover-mask-width) var(--cover-mask-height);
+	mask-size: auto var(--cover-mask-height);
 	-webkit-mask-image: url("/img/mask/mask-portrait.svg");
 	-webkit-mask-position: center;
 	-webkit-mask-repeat: no-repeat;
-	-webkit-mask-size: var(--cover-mask-width) var(--cover-mask-height);
+	-webkit-mask-size: auto var(--cover-mask-height);
 	pointer-events: none;
 	perspective: clamp(840px, 72vw, 1320px);
 	perspective-origin: calc(50% + var(--mx) * 7%) calc(50% + var(--my) * 6%);
 	transform-style: preserve-3d;
 	transform-origin: 50% 50%;
 	will-change: mask-size, opacity, transform;
+}
+
+.cover-world {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc((var(--cover-scene-width) - 100vw) / 2);
+	width: 100vw;
+	transform-origin: 50% 50%;
+	will-change: transform;
 }
 
 .cover-bg,
@@ -252,6 +265,7 @@ button {
 }
 
 .cover-bg {
+	inset: 0 calc((100vw - var(--cover-scene-width)) / 2);
 	background-image: url("/img/cover-bg.webp");
 	transform: translate3d(calc(var(--mx) * -44px), calc(var(--my) * -34px), -28px) rotateX(calc(var(--my) * -3.4deg)) rotateY(calc(var(--mx) * 5deg)) rotateZ(calc(var(--mx) * -0.7deg)) scale(1.1);
 	transform-origin: center;
@@ -275,9 +289,12 @@ button {
 .cover-avatar {
 	position: absolute;
 	z-index: 2;
-	top: -22svh;
-	left: 54.6vw;
-	width: min(132vw, 205svh);
+	--cover-avatar-top: -22svh;
+	--cover-avatar-left: 54.6vw;
+	--cover-avatar-width: min(132vw, 205svh);
+	top: var(--cover-avatar-top);
+	left: var(--cover-avatar-left);
+	width: var(--cover-avatar-width);
 	aspect-ratio: 1500 / 2066;
 	pointer-events: none;
 	transform: translateX(-50%) translate3d(calc(var(--mx) * -18px), calc(var(--my) * -14px), 18px) rotateX(calc(var(--my) * -2.2deg)) rotateY(calc(var(--mx) * 3.4deg))
@@ -537,7 +554,7 @@ button {
 	position: absolute;
 	top: clamp(76px, 11vh, 108px);
 	right: clamp(60px, 4vw, 60px);
-	width: clamp(420px, 35.3vw, 533px);
+	width: clamp(423px, 54.3vh, 533px);
 	height: clamp(640px, 82.1vh, 806px);
 	background: url("/img/cover-bg.webp") center / cover;
 	opacity: 0;
@@ -1034,9 +1051,9 @@ button {
 	}
 
 	.cover-avatar {
-		top: 20.4svh;
-		left: 58.6vw;
-		width: min(138vw, 78svh);
+		--cover-avatar-top: 20.4svh;
+		--cover-avatar-left: 58.6vw;
+		--cover-avatar-width: min(138vw, 78svh);
 		transform: translateX(-50%) translate3d(calc(var(--mx) * -10px), calc(var(--my) * -9px), 12px) rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 2deg)) rotateZ(calc(var(--mx) * -0.2deg));
 	}
 

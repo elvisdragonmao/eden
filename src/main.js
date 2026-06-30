@@ -19,6 +19,10 @@ const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
+const coverStartScale = 1.56;
+const coverStartRotation = -20;
+const coverAvatarAspect = 1500 / 2066;
+const coverStartMaskHeight = "max(460vh, 300vw)";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -107,6 +111,26 @@ function baseRect(element) {
 	return rect;
 }
 
+function resetCoverAvatarVars() {
+	const avatar = document.querySelector(".cover-avatar");
+	if (!avatar) return;
+	avatar.style.removeProperty("--cover-avatar-top");
+	avatar.style.removeProperty("--cover-avatar-left");
+	avatar.style.removeProperty("--cover-avatar-width");
+}
+
+function readCoverAvatarVars() {
+	const avatar = document.querySelector(".cover-avatar");
+	if (!avatar) return {};
+	const style = getComputedStyle(avatar);
+
+	return {
+		"--cover-avatar-top": style.top,
+		"--cover-avatar-left": style.left,
+		"--cover-avatar-width": style.width
+	};
+}
+
 function alignToElement(fromSelector, toSelector, axis) {
 	return () => {
 		const from = baseRect(document.querySelector(fromSelector));
@@ -119,6 +143,16 @@ function alignToElement(fromSelector, toSelector, axis) {
 		if (axis === "scaleY") return to.height / from.height;
 
 		return 0;
+	};
+}
+
+function scaleToElementHeight(fromSelector, toSelector) {
+	return () => {
+		const from = baseRect(document.querySelector(fromSelector));
+		const to = baseRect(document.querySelector(toSelector));
+		if (!from || !to) return 1;
+
+		return to.height / from.height;
 	};
 }
 
@@ -170,16 +204,22 @@ function initStoryTimeline() {
 			const { mobile } = context.conditions;
 			let coverWasActive = false;
 
+			resetCoverAvatarVars();
 			gsap.set(".cover-section", { autoAlpha: 1 });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
 				x: 0,
 				y: 0,
-				scaleX: 1,
-				scaleY: 1,
-				"--cover-mask-width": "180vw",
-				"--cover-mask-height": "180vh"
+				scale: coverStartScale,
+				rotation: coverStartRotation,
+				"--cover-mask-height": coverStartMaskHeight
 			});
+			gsap.set(".cover-world", {
+				scale: 1 / coverStartScale,
+				rotation: -coverStartRotation,
+				transformOrigin: "50% 50%"
+			});
+			gsap.set(".cover-avatar", readCoverAvatarVars());
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
 			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
@@ -232,13 +272,24 @@ function initStoryTimeline() {
 				{
 					x: alignToElement(".cover-scene", ".about-portrait", "x"),
 					y: alignToElement(".cover-scene", ".about-portrait", "y"),
-					scaleX: alignToElement(".cover-scene", ".about-portrait", "scaleX"),
-					scaleY: alignToElement(".cover-scene", ".about-portrait", "scaleY"),
+					scale: scaleToElementHeight(".cover-scene", ".about-portrait"),
+					rotation: 0,
 					duration: 0.24
 				},
 				0.1
 			);
-			tl.to(".cover-scene", { "--cover-mask-width": "100%", "--cover-mask-height": "100%", duration: 0.1 }, 0.1);
+			tl.to(".cover-world", { scale: 1, rotation: 0, duration: 0.24 }, 0.1);
+			tl.to(".cover-scene", { "--cover-mask-height": "100%", duration: 0.1 }, 0.1);
+			tl.to(
+				".cover-avatar",
+				{
+					"--cover-avatar-top": "0px",
+					"--cover-avatar-left": () => `${window.innerWidth / 2}px`,
+					"--cover-avatar-width": () => `${window.innerHeight * coverAvatarAspect}px`,
+					duration: 0.24
+				},
+				0.1
+			);
 			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
 			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, 0.24);
@@ -309,11 +360,17 @@ function initReducedStory() {
 		autoAlpha: 1,
 		x: 0,
 		y: 0,
-		scaleX: 1,
-		scaleY: 1,
-		"--cover-mask-width": "180vw",
-		"--cover-mask-height": "180vh"
+		scale: coverStartScale,
+		rotation: coverStartRotation,
+		"--cover-mask-height": coverStartMaskHeight
 	});
+	gsap.set(".cover-world", {
+		scale: 1 / coverStartScale,
+		rotation: -coverStartRotation,
+		transformOrigin: "50% 50%"
+	});
+	resetCoverAvatarVars();
+	gsap.set(".cover-avatar", readCoverAvatarVars());
 }
 
 function initGalleryMarquee() {
