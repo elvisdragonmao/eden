@@ -229,6 +229,9 @@ button {
 	background: #a7b6bb;
 	clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left) round 0px);
 	pointer-events: none;
+	perspective: clamp(840px, 72vw, 1320px);
+	perspective-origin: calc(50% + var(--mx) * 7%) calc(50% + var(--my) * 6%);
+	transform-style: preserve-3d;
 	will-change: clip-path, opacity, transform;
 }
 
@@ -243,7 +246,7 @@ button {
 
 .cover-bg {
 	background-image: url("/img/cover-bg.webp");
-	transform: translate3d(calc(var(--mx) * -16px), calc(var(--my) * -12px), 0) rotate(calc(var(--mx) * 0.45deg)) scale(1.04);
+	transform: translate3d(calc(var(--mx) * -44px), calc(var(--my) * -34px), -28px) rotateX(calc(var(--my) * -3.4deg)) rotateY(calc(var(--mx) * 5deg)) rotateZ(calc(var(--mx) * -0.7deg)) scale(1.1);
 	transform-origin: center;
 }
 
@@ -270,7 +273,8 @@ button {
 	width: min(132vw, 205svh);
 	aspect-ratio: 1500 / 2066;
 	pointer-events: none;
-	transform: translateX(-50%) translate3d(calc(var(--mx) * 24px), calc(var(--my) * 18px), 0) rotate(calc(var(--mx) * 1.2deg));
+	transform: translateX(-50%) translate3d(calc(var(--mx) * -18px), calc(var(--my) * -14px), 18px) rotateX(calc(var(--my) * -2.2deg)) rotateY(calc(var(--mx) * 3.4deg))
+		rotateZ(calc(var(--mx) * -0.35deg));
 	transform-origin: 50% 40%;
 	will-change: transform;
 }
@@ -1009,7 +1013,7 @@ button {
 
 	.cover-bg {
 		background-position: 50% 50%;
-		transform: scale(1.02);
+		transform: translate3d(calc(var(--mx) * -18px), calc(var(--my) * -14px), -18px) rotateX(calc(var(--my) * -1.6deg)) rotateY(calc(var(--mx) * 2.4deg)) rotateZ(calc(var(--mx) * -0.35deg)) scale(1.05);
 	}
 
 	.cover-title {
@@ -1024,7 +1028,7 @@ button {
 		top: 20.4svh;
 		left: 58.6vw;
 		width: min(138vw, 78svh);
-		transform: translateX(-50%) translate3d(calc(var(--mx) * 10px), calc(var(--my) * 10px), 0) rotate(calc(var(--mx) * 0.7deg));
+		transform: translateX(-50%) translate3d(calc(var(--mx) * -10px), calc(var(--my) * -9px), 12px) rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 2deg)) rotateZ(calc(var(--mx) * -0.2deg));
 	}
 
 	.scroll-cue {
