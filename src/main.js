@@ -19,7 +19,8 @@ const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
-const coverStartScale = 1.8;
+let syncCoverParallaxProgress = () => {};
+const coverMaskAspect = 533 / 806;
 const coverAvatarAspect = 1500 / 2066;
 const coverFinalAvatarOffset = 28;
 
@@ -54,33 +55,53 @@ function initMenu() {
 function initPointerParallax() {
 	const root = document.documentElement;
 	let pointerTween;
+	let pointerX = 0;
+	let pointerY = 0;
+	let storyProgress = 0;
+
+	const coverFactors = () => {
+		const fade = 1 - clamp((storyProgress - 0.06) / 0.2, 0, 1);
+		return {
+			x: 0.45 + fade * 0.55,
+			y: fade
+		};
+	};
+
+	const applyPointer = duration => {
+		const factors = coverFactors();
+
+		pointerTween?.kill();
+		pointerTween = gsap.to(root, {
+			"--mx": pointerX.toFixed(4),
+			"--my": pointerY.toFixed(4),
+			"--cover-mx": (pointerX * factors.x).toFixed(4),
+			"--cover-my": (pointerY * factors.y).toFixed(4),
+			duration,
+			ease: "power3.out"
+		});
+	};
+
+	syncCoverParallaxProgress = progress => {
+		storyProgress = progress;
+		applyPointer(0.08);
+	};
 
 	window.addEventListener(
 		"pointermove",
 		event => {
 			if (event.pointerType === "touch") return;
 
-			const mx = (event.clientX / window.innerWidth - 0.5) * 2;
-			const my = (event.clientY / window.innerHeight - 0.5) * 2;
-
-			pointerTween?.kill();
-			pointerTween = gsap.to(root, {
-				"--mx": mx.toFixed(4),
-				"--my": my.toFixed(4),
-				duration: 0.5,
-				ease: "power3.out"
-			});
+			pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
+			pointerY = (event.clientY / window.innerHeight - 0.5) * 2;
+			applyPointer(0.5);
 		},
 		{ passive: true }
 	);
 
 	window.addEventListener("pointerleave", () => {
-		gsap.to(root, {
-			"--mx": 0,
-			"--my": 0,
-			duration: 0.8,
-			ease: "power3.out"
-		});
+		pointerX = 0;
+		pointerY = 0;
+		applyPointer(0.8);
 	});
 }
 
@@ -110,12 +131,17 @@ function baseRect(element) {
 	return rect;
 }
 
-function coverStartMaskHeight() {
-	return `${Math.max(window.innerHeight * 4.6, window.innerWidth * 3)}px`;
+function coverStartScale() {
+	const baseWidth = window.innerHeight * coverMaskAspect;
+	return Math.max(window.innerWidth / baseWidth, 1) * 1.18;
 }
 
-function coverFinalMaskHeight() {
-	return `${window.innerHeight}px`;
+function syncCoverBackgroundScale() {
+	const mobile = window.matchMedia("(max-width: 900px)").matches;
+	const maxShiftX = mobile ? 30 : 72;
+	const maxShiftY = mobile ? 24 : 56;
+	const scale = Math.max((window.innerWidth + maxShiftX * 2) / window.innerWidth, (window.innerHeight + maxShiftY * 2) / window.innerHeight) * 1.04;
+	document.documentElement.style.setProperty("--cover-bg-scale", scale.toFixed(4));
 }
 
 function resetCoverAvatarLayout() {
@@ -213,6 +239,7 @@ function initStoryTimeline() {
 		context => {
 			const { mobile } = context.conditions;
 			let coverWasActive = false;
+			const initialCoverScale = coverStartScale();
 
 			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
@@ -220,17 +247,16 @@ function initStoryTimeline() {
 				autoAlpha: 1,
 				x: 0,
 				y: 0,
-				scale: coverStartScale,
+				scale: initialCoverScale,
 				rotateX: 0,
 				rotateY: 0,
 				rotation: 0,
-				transformPerspective: 1200,
-				"--cover-mask-height": coverStartMaskHeight()
+				transformPerspective: 1200
 			});
 			gsap.set(".cover-content", {
 				x: 0,
 				y: 0,
-				scale: 1 / coverStartScale,
+				scale: 1 / initialCoverScale,
 				rotateX: 0,
 				rotateY: 0,
 				rotation: 0,
@@ -273,6 +299,7 @@ function initStoryTimeline() {
 					invalidateOnRefresh: true,
 					onUpdate: self => {
 						setThemeByProgress(self.progress);
+						syncCoverParallaxProgress(self.progress);
 						setGalleryMarqueeActive(self.progress > 0.955);
 
 						const isCoverActive = self.progress < 0.035;
@@ -298,7 +325,6 @@ function initStoryTimeline() {
 				},
 				0.1
 			);
-			tl.fromTo(".cover-scene", { "--cover-mask-height": coverStartMaskHeight }, { "--cover-mask-height": coverFinalMaskHeight, duration: 0.24 }, 0.1);
 			tl.to(".cover-content", { x: 0, y: 0, scale: 1, rotateX: 0, rotateY: 0, rotation: 0, duration: 0.24 }, 0.1);
 			tl.to(
 				".cover-avatar",
@@ -374,23 +400,24 @@ function initStoryTimeline() {
 
 function initReducedStory() {
 	setChromeTheme("cover");
+	const initialCoverScale = coverStartScale();
+
 	gsap.set(".section", { autoAlpha: 0 });
 	gsap.set(".cover-section", { autoAlpha: 1 });
 	gsap.set(".cover-scene", {
 		autoAlpha: 1,
 		x: 0,
 		y: 0,
-		scale: coverStartScale,
+		scale: initialCoverScale,
 		rotateX: 0,
 		rotateY: 0,
 		rotation: 0,
-		transformPerspective: 1200,
-		"--cover-mask-height": coverStartMaskHeight()
+		transformPerspective: 1200
 	});
 	gsap.set(".cover-content", {
 		x: 0,
 		y: 0,
-		scale: 1 / coverStartScale,
+		scale: 1 / initialCoverScale,
 		rotateX: 0,
 		rotateY: 0,
 		rotation: 0,
@@ -563,6 +590,9 @@ function initLightbox() {
 	lightboxStage.addEventListener("pointercancel", endDrag);
 	lightboxImage.draggable = false;
 }
+
+syncCoverBackgroundScale();
+window.addEventListener("resize", syncCoverBackgroundScale);
 
 if (!prefersReducedMotion) {
 	initInkSweep();

@@ -22,6 +22,9 @@
 	--frame-radius: 32px;
 	--mx: 0;
 	--my: 0;
+	--cover-mx: 0;
+	--cover-my: 0;
+	--cover-bg-scale: 1.2;
 	font-family: FancyFreeFont1, system-ui, sans-serif;
 	color: var(--ink);
 	background: var(--paper);
@@ -221,30 +224,32 @@ button {
 .cover-scene {
 	position: absolute;
 	top: 0;
-	bottom: 0;
 	left: calc((100vw - var(--cover-scene-width)) / 2);
 	width: var(--cover-scene-width);
+	height: 100svh;
 	overflow: visible;
-	--cover-scene-width: max(100vw, 66.13svh);
-	--cover-mask-height: max(460vh, 300vw);
+	--cover-scene-width: calc(100svh * 533 / 806);
 	background: #a7b6bb;
 	mask-image: url("/img/mask/mask-portrait.svg");
 	mask-mode: alpha;
 	mask-position: center;
 	mask-repeat: no-repeat;
-	mask-size: auto var(--cover-mask-height);
+	mask-size: 100% 100%;
 	-webkit-mask-image: url("/img/mask/mask-portrait.svg");
 	-webkit-mask-position: center;
 	-webkit-mask-repeat: no-repeat;
-	-webkit-mask-size: auto var(--cover-mask-height);
+	-webkit-mask-size: 100% 100%;
 	pointer-events: none;
 	transform-origin: 50% 50%;
-	will-change: mask-size, opacity, transform;
+	will-change: opacity, transform;
 }
 
 .cover-content {
 	position: absolute;
-	inset: 0;
+	top: 0;
+	left: calc((var(--cover-scene-width) - 100vw) / 2);
+	width: 100vw;
+	height: 100svh;
 	transform-origin: 50% 50%;
 	transform-style: preserve-3d;
 	will-change: transform;
@@ -252,10 +257,7 @@ button {
 
 .cover-world {
 	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: calc((var(--cover-scene-width) - 100vw) / 2);
-	width: 100vw;
+	inset: 0;
 	perspective: clamp(840px, 72vw, 1320px);
 	transform-origin: 50% 50%;
 	transform-style: preserve-3d;
@@ -272,9 +274,10 @@ button {
 }
 
 .cover-bg {
-	inset: 0 calc((100vw - var(--cover-scene-width)) / 2);
+	inset: -12vh -12vw;
 	background-image: url("/img/cover-bg.webp");
-	transform: translate3d(calc(var(--mx) * -72px), calc(var(--my) * -56px), -32px) rotateX(calc(var(--my) * -3.2deg)) rotateY(calc(var(--mx) * 4.8deg)) scale(1.12);
+	transform: translate3d(calc(var(--cover-mx) * -72px), calc(var(--cover-my) * -56px), -32px) rotateX(calc(var(--cover-my) * -3.2deg)) rotateY(calc(var(--cover-mx) * 4.8deg))
+		scale(var(--cover-bg-scale));
 	transform-origin: center;
 }
 
@@ -304,7 +307,7 @@ button {
 	width: var(--cover-avatar-width);
 	aspect-ratio: 1500 / 2066;
 	pointer-events: none;
-	transform: translateX(-50%) translate3d(calc(var(--mx) * -34px), calc(var(--my) * -28px), 24px) rotateX(calc(var(--my) * -2deg)) rotateY(calc(var(--mx) * 3deg));
+	transform: translateX(-50%) translate3d(calc(var(--cover-mx) * -34px), calc(var(--cover-my) * -28px), 24px) rotateX(calc(var(--cover-my) * -2deg)) rotateY(calc(var(--cover-mx) * 3deg));
 	transform-origin: 50% 40%;
 	will-change: transform;
 }
@@ -1045,7 +1048,8 @@ button {
 
 	.cover-bg {
 		background-position: 50% 50%;
-		transform: translate3d(calc(var(--mx) * -30px), calc(var(--my) * -24px), -18px) rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 2.2deg)) scale(1.06);
+		transform: translate3d(calc(var(--cover-mx) * -30px), calc(var(--cover-my) * -24px), -18px) rotateX(calc(var(--cover-my) * -1.4deg)) rotateY(calc(var(--cover-mx) * 2.2deg))
+			scale(var(--cover-bg-scale));
 	}
 
 	.cover-title {
