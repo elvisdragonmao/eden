@@ -292,11 +292,11 @@ button {
 	mask-image: url("/img/mask/inkmask.png");
 	mask-repeat: no-repeat;
 	mask-size: auto 100%;
-	mask-position: 0% 50%;
+	mask-position: 100% 50%;
 	-webkit-mask-image: url("/img/mask/inkmask.png");
 	-webkit-mask-repeat: no-repeat;
 	-webkit-mask-size: auto 100%;
-	-webkit-mask-position: 0% 50%;
+	-webkit-mask-position: 100% 50%;
 }
 
 .cover-scene.is-ink-playing .cover-avatar-color {
@@ -896,13 +896,13 @@ button {
 
 @keyframes ink-sweep {
 	from {
-		mask-position: 0% 50%;
-		-webkit-mask-position: 0% 50%;
+		mask-position: 100% 50%;
+		-webkit-mask-position: 100% 50%;
 	}
 
 	to {
-		mask-position: 100% 50%;
-		-webkit-mask-position: 100% 50%;
+		mask-position: 0% 50%;
+		-webkit-mask-position: 0% 50%;
 	}
 }
 
