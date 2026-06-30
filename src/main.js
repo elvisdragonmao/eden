@@ -22,7 +22,7 @@ let galleryMarqueeActive = false;
 const coverStartScale = 1.56;
 const coverStartRotation = -20;
 const coverAvatarAspect = 1500 / 2066;
-const coverStartMaskHeight = "max(460vh, 300vw)";
+const coverFinalAvatarOffset = 28;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -111,23 +111,34 @@ function baseRect(element) {
 	return rect;
 }
 
-function resetCoverAvatarVars() {
+function coverStartMaskHeight() {
+	return `${Math.max(window.innerHeight * 4.6, window.innerWidth * 3)}px`;
+}
+
+function coverFinalMaskHeight() {
+	return `${window.innerHeight}px`;
+}
+
+function resetCoverAvatarLayout() {
 	const avatar = document.querySelector(".cover-avatar");
 	if (!avatar) return;
+	avatar.style.removeProperty("top");
+	avatar.style.removeProperty("left");
+	avatar.style.removeProperty("width");
 	avatar.style.removeProperty("--cover-avatar-top");
 	avatar.style.removeProperty("--cover-avatar-left");
 	avatar.style.removeProperty("--cover-avatar-width");
 }
 
-function readCoverAvatarVars() {
+function readCoverAvatarLayout() {
 	const avatar = document.querySelector(".cover-avatar");
 	if (!avatar) return {};
 	const style = getComputedStyle(avatar);
 
 	return {
-		"--cover-avatar-top": style.top,
-		"--cover-avatar-left": style.left,
-		"--cover-avatar-width": style.width
+		top: style.top,
+		left: style.left,
+		width: style.width
 	};
 }
 
@@ -204,7 +215,7 @@ function initStoryTimeline() {
 			const { mobile } = context.conditions;
 			let coverWasActive = false;
 
-			resetCoverAvatarVars();
+			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
@@ -212,14 +223,14 @@ function initStoryTimeline() {
 				y: 0,
 				scale: coverStartScale,
 				rotation: coverStartRotation,
-				"--cover-mask-height": coverStartMaskHeight
+				"--cover-mask-height": coverStartMaskHeight()
 			});
 			gsap.set(".cover-world", {
 				scale: 1 / coverStartScale,
 				rotation: -coverStartRotation,
 				transformOrigin: "50% 50%"
 			});
-			gsap.set(".cover-avatar", readCoverAvatarVars());
+			gsap.set(".cover-avatar", readCoverAvatarLayout());
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
 			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
@@ -265,8 +276,8 @@ function initStoryTimeline() {
 			});
 
 			tl.to({}, { duration: 1 }, 0);
-			tl.set(".about-section", { autoAlpha: 1 }, 0.08);
-			tl.to(".about-section", { "--about-grid-opacity": 1, duration: 0.18 }, 0.1);
+			tl.set(".about-section", { autoAlpha: 1 }, 0.14);
+			tl.to(".about-section", { "--about-grid-opacity": 1, duration: 0.18 }, 0.14);
 			tl.to(
 				".cover-scene",
 				{
@@ -279,16 +290,16 @@ function initStoryTimeline() {
 				0.1
 			);
 			tl.to(".cover-world", { scale: 1, rotation: 0, duration: 0.24 }, 0.1);
-			tl.to(".cover-scene", { "--cover-mask-height": "100%", duration: 0.1 }, 0.1);
+			tl.fromTo(".cover-scene", { "--cover-mask-height": coverStartMaskHeight }, { "--cover-mask-height": coverFinalMaskHeight, duration: 0.24 }, 0.1);
 			tl.to(
 				".cover-avatar",
 				{
-					"--cover-avatar-top": "0px",
-					"--cover-avatar-left": () => `${window.innerWidth / 2}px`,
-					"--cover-avatar-width": () => `${window.innerHeight * coverAvatarAspect}px`,
-					duration: 0.24
+					top: () => `${mobile ? 22 : coverFinalAvatarOffset}px`,
+					left: () => `${window.innerWidth / 2}px`,
+					width: () => `${window.innerHeight * coverAvatarAspect}px`,
+					duration: 0.14
 				},
-				0.1
+				0.2
 			);
 			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
@@ -362,15 +373,15 @@ function initReducedStory() {
 		y: 0,
 		scale: coverStartScale,
 		rotation: coverStartRotation,
-		"--cover-mask-height": coverStartMaskHeight
+		"--cover-mask-height": coverStartMaskHeight()
 	});
 	gsap.set(".cover-world", {
 		scale: 1 / coverStartScale,
 		rotation: -coverStartRotation,
 		transformOrigin: "50% 50%"
 	});
-	resetCoverAvatarVars();
-	gsap.set(".cover-avatar", readCoverAvatarVars());
+	resetCoverAvatarLayout();
+	gsap.set(".cover-avatar", readCoverAvatarLayout());
 }
 
 function initGalleryMarquee() {
