@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      gsap:
+        specifier: ^3.15.0
+        version: 3.15.0
     devDependencies:
       prettier:
         specifier: ^3.9.3
@@ -170,6 +174,9 @@ packages:
 
   git-hooks-list@4.2.1:
     resolution: {integrity: sha512-WNvqJjOxxs/8ZP9+DWdwWJ7cDsd60NHf39XnD82pDVrKO5q7xfPqpkK6hwEAmBa/ZSEE4IOoR75EzbbIuwGlMw==}
+
+  gsap@3.15.0:
+    resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
   is-plain-obj@4.1.0:
     resolution: {integrity: sha512-+Pgi+vMuUNkJyExiMBt5IlFoMyKnr5zhJ4Uspz58WOhBF5QoIZkFyNHIbBAtHwzVAgk5RtndVNsDRN61/mmDqg==}
@@ -462,6 +469,8 @@ snapshots:
     optional: true
 
   git-hooks-list@4.2.1: {}
+
+  gsap@3.15.0: {}
 
   is-plain-obj@4.1.0: {}
 
