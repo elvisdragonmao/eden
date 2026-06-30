@@ -242,6 +242,14 @@ button {
 	will-change: mask-size, opacity, transform;
 }
 
+.cover-content {
+	position: absolute;
+	inset: 0;
+	transform-origin: 50% 50%;
+	transform-style: preserve-3d;
+	will-change: transform;
+}
+
 .cover-world {
 	position: absolute;
 	top: 0;

@@ -19,8 +19,9 @@ const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
-const coverStartScale = 1.56;
-const coverStartRotation = -20;
+const coverStartScale = 1.8;
+const coverStartRotateX = 5;
+const coverStartRotateY = -8;
 const coverAvatarAspect = 1500 / 2066;
 const coverFinalAvatarOffset = 28;
 
@@ -117,6 +118,22 @@ function coverStartMaskHeight() {
 
 function coverFinalMaskHeight() {
 	return `${window.innerHeight}px`;
+}
+
+function coverStartOffsetX() {
+	return -clamp(window.innerWidth * 0.045, 28, 72);
+}
+
+function coverStartOffsetY() {
+	return -clamp(window.innerHeight * 0.04, 20, 44);
+}
+
+function coverContentStartOffsetX() {
+	return -coverStartOffsetX() / coverStartScale;
+}
+
+function coverContentStartOffsetY() {
+	return -coverStartOffsetY() / coverStartScale;
 }
 
 function resetCoverAvatarLayout() {
@@ -219,17 +236,25 @@ function initStoryTimeline() {
 			gsap.set(".cover-section", { autoAlpha: 1 });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
-				x: 0,
-				y: 0,
+				x: coverStartOffsetX(),
+				y: coverStartOffsetY(),
 				scale: coverStartScale,
-				rotation: coverStartRotation,
+				rotateX: coverStartRotateX,
+				rotateY: coverStartRotateY,
+				rotation: 0,
+				transformPerspective: 1200,
 				"--cover-mask-height": coverStartMaskHeight()
 			});
-			gsap.set(".cover-world", {
+			gsap.set(".cover-content", {
+				x: coverContentStartOffsetX(),
+				y: coverContentStartOffsetY(),
 				scale: 1 / coverStartScale,
-				rotation: -coverStartRotation,
+				rotateX: -coverStartRotateX,
+				rotateY: -coverStartRotateY,
+				rotation: 0,
 				transformOrigin: "50% 50%"
 			});
+			gsap.set(".cover-world", { clearProps: "transform" });
 			gsap.set(".cover-avatar", readCoverAvatarLayout());
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
@@ -284,13 +309,15 @@ function initStoryTimeline() {
 					x: alignToElement(".cover-scene", ".about-portrait", "x"),
 					y: alignToElement(".cover-scene", ".about-portrait", "y"),
 					scale: scaleToElementHeight(".cover-scene", ".about-portrait"),
+					rotateX: 0,
+					rotateY: 0,
 					rotation: 0,
 					duration: 0.24
 				},
 				0.1
 			);
-			tl.to(".cover-world", { scale: 1, rotation: 0, duration: 0.24 }, 0.1);
 			tl.fromTo(".cover-scene", { "--cover-mask-height": coverStartMaskHeight }, { "--cover-mask-height": coverFinalMaskHeight, duration: 0.24 }, 0.1);
+			tl.to(".cover-content", { x: 0, y: 0, scale: 1, rotateX: 0, rotateY: 0, rotation: 0, duration: 0.24 }, 0.1);
 			tl.to(
 				".cover-avatar",
 				{
@@ -369,17 +396,25 @@ function initReducedStory() {
 	gsap.set(".cover-section", { autoAlpha: 1 });
 	gsap.set(".cover-scene", {
 		autoAlpha: 1,
-		x: 0,
-		y: 0,
+		x: coverStartOffsetX(),
+		y: coverStartOffsetY(),
 		scale: coverStartScale,
-		rotation: coverStartRotation,
+		rotateX: coverStartRotateX,
+		rotateY: coverStartRotateY,
+		rotation: 0,
+		transformPerspective: 1200,
 		"--cover-mask-height": coverStartMaskHeight()
 	});
-	gsap.set(".cover-world", {
+	gsap.set(".cover-content", {
+		x: coverContentStartOffsetX(),
+		y: coverContentStartOffsetY(),
 		scale: 1 / coverStartScale,
-		rotation: -coverStartRotation,
+		rotateX: -coverStartRotateX,
+		rotateY: -coverStartRotateY,
+		rotation: 0,
 		transformOrigin: "50% 50%"
 	});
+	gsap.set(".cover-world", { clearProps: "transform" });
 	resetCoverAvatarLayout();
 	gsap.set(".cover-avatar", readCoverAvatarLayout());
 }
