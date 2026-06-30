@@ -54,120 +54,131 @@
 		</div>
 
 		<main id="content">
-			<section class="section cover-section" id="cover" aria-label="伊甸封面" data-chrome="light">
-				<div class="cover-bg" aria-hidden="true"></div>
-				<h1 class="cover-title">伊甸</h1>
-				<div class="cover-avatar" aria-hidden="true">
-					<img class="cover-avatar-base" src="/img/cover-avatar.webp" alt="" decoding="async" />
-					<img class="cover-avatar-color" src="/img/cover-avatar.webp" alt="" decoding="async" />
-				</div>
-				<a class="scroll-cue" href="#about" aria-label="往下捲動到關於區塊">
-					<span class="scroll-arrow" aria-hidden="true"></span>
-					<span>Scroll</span>
-				</a>
-			</section>
+			<div class="story-scroll">
+				<span class="story-anchor" id="cover" style="--anchor-top: 0svh"></span>
+				<span class="story-anchor" id="about" style="--anchor-top: 140svh"></span>
+				<span class="story-anchor" id="commission" style="--anchor-top: 235svh"></span>
+				<span class="story-anchor" id="gallery" style="--anchor-top: 420svh"></span>
 
-			<section class="section about-section" id="about" aria-label="關於伊甸" data-chrome="dark">
-				<div class="about-shell">
-					<div class="about-rule about-rule-top" aria-hidden="true"></div>
-					<div class="about-rule about-rule-bottom" aria-hidden="true"></div>
-
-					<div class="about-title" data-reveal="about-title">
-						<p>
-							<span>這裡是伊甸</span>
-							<small>，</small>
-						</p>
-						<p>
-							<span>一條藍色</span>
-							<small>的</small>
-							<span>龍</span>
-						</p>
-					</div>
-
-					<figure class="about-feier" data-reveal="soft">
-						<img src="/img/feier.webp" alt="伊甸的小角色插圖" />
-					</figure>
-
-					<div class="about-copy about-copy-one" data-reveal="text">
-						<p>喜歡寫程式、寫網頁、做設計、玩音樂</p>
-					</div>
-					<div class="about-copy about-copy-two" data-reveal="text">
-						<p>夢想是希望透過科技</p>
-						<p>讓世界有一點點不一樣</p>
-					</div>
-
-					<figure class="about-head masked-square" data-reveal="soft">
-						<img src="/img/head.webp" alt="伊甸頭像" />
-					</figure>
-
-					<figure class="about-portrait masked-portrait" data-reveal="soft">
-						<img src="/img/cover-avatar.webp" alt="伊甸伸手打招呼的全身插圖" />
-					</figure>
-				</div>
-			</section>
-
-			<section class="section commission-section" id="commission" aria-label="委託資訊" data-chrome="light">
-				<div class="commission-bg" aria-hidden="true"></div>
-				<div class="commission-copy" data-reveal="text">
-					<h2>我喜歡做酷東西</h2>
-					<p>如果你有任何有趣的想法，</p>
-					<p>也喜歡酷酷、高性能的網頁</p>
-					<p>歡迎可以來找我！</p>
-				</div>
-
-				<div class="commission-flip" aria-hidden="true">
-					<div class="flip-card">
-						<div class="flip-face flip-front">
-							<img src="/img/head.webp" alt="" />
+				<div class="story-stage">
+					<section class="section cover-section" aria-label="伊甸封面" data-scene="cover">
+						<div class="cover-scene">
+							<div class="cover-bg" aria-hidden="true"></div>
+							<h1 class="cover-title">伊甸</h1>
+							<div class="cover-avatar" aria-hidden="true">
+								<img class="cover-avatar-base" src="/img/cover-avatar.webp" alt="" decoding="async" />
+								<img class="cover-avatar-color" src="/img/cover-avatar.webp" alt="" decoding="async" />
+							</div>
+							<a class="scroll-cue" href="#about" aria-label="往下捲動到關於區塊">
+								<span class="scroll-arrow" aria-hidden="true"></span>
+								<span>Scroll</span>
+							</a>
 						</div>
-						<div class="flip-face flip-back">
-							<div class="flip-back-preview">
-								<span>Gallery</span>
-								<img src="/img/me/yukiminoideyu.webp" alt="" />
-								<img src="/img/me/orion.webp" alt="" />
+					</section>
+
+					<section class="section about-section" aria-label="關於伊甸" data-scene="about">
+						<div class="about-shell">
+							<div class="about-rule about-rule-top" aria-hidden="true"></div>
+							<div class="about-rule about-rule-bottom" aria-hidden="true"></div>
+
+							<div class="about-title" data-reveal="about-title">
+								<p>
+									<span>這裡是伊甸</span>
+									<small>，</small>
+								</p>
+								<p>
+									<span>一條藍色</span>
+									<small>的</small>
+									<span>龍</span>
+								</p>
+							</div>
+
+							<figure class="about-feier" data-reveal="soft">
+								<img src="/img/feier.webp" alt="伊甸的小角色插圖" />
+							</figure>
+
+							<div class="about-copy about-copy-one" data-reveal="text">
+								<p>喜歡寫程式、寫網頁、做設計、玩音樂</p>
+							</div>
+							<div class="about-copy about-copy-two" data-reveal="text">
+								<p>夢想是希望透過科技</p>
+								<p>讓世界有一點點不一樣</p>
+							</div>
+
+							<figure class="about-head masked-square" data-reveal="soft">
+								<img src="/img/head.webp" alt="伊甸頭像" />
+							</figure>
+
+							<figure class="about-portrait masked-portrait" data-reveal="soft" aria-hidden="true">
+								<img src="/img/cover-avatar.webp" alt="" />
+							</figure>
+						</div>
+					</section>
+
+					<section class="section commission-section" aria-label="委託資訊" data-scene="commission">
+						<div class="commission-bg" aria-hidden="true"></div>
+						<div class="commission-copy" data-reveal="text">
+							<h2>我喜歡做酷東西</h2>
+							<p>如果你有任何有趣的想法，</p>
+							<p>也喜歡酷酷、高性能的網頁</p>
+							<p>歡迎可以來找我！</p>
+						</div>
+
+						<div class="commission-flip" aria-hidden="true">
+							<div class="flip-card">
+								<div class="flip-face flip-front">
+									<img src="/img/head.webp" alt="" />
+								</div>
+								<div class="flip-face flip-back">
+									<div class="flip-back-preview">
+										<span>Gallery</span>
+										<img src="/img/me/yukiminoideyu.webp" alt="" />
+										<img src="/img/me/orion.webp" alt="" />
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					</section>
+
+					<section class="section gallery-section" aria-label="圖集" data-scene="gallery">
+						<div class="gallery-top-rule" aria-hidden="true"></div>
+						<h2 data-reveal="text">圖集</h2>
+						<p class="gallery-intro" data-reveal="text">
+							<span>見到我歡迎跟我抱抱打招呼！</span>
+							<span>請多多指教！</span>
+						</p>
+
+						<div class="gallery-marquee" data-gallery-marquee>
+							<div class="gallery-track">
+								<button class="gallery-card is-transition" type="button" data-full="/img/head.webp" data-caption="星光頭像" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/head.webp" alt="星光頭像" />
+								</button>
+								<button class="gallery-card" type="button" data-full="/img/cover-avatar.webp" data-caption="伸手打招呼的伊甸" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/cover-avatar.webp" alt="伸手打招呼的伊甸" />
+								</button>
+								<button class="gallery-card is-narrow" type="button" data-full="/img/feier.webp" data-caption="菲爾" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/feier.webp" alt="菲爾角色插圖" />
+								</button>
+								<button class="gallery-card" type="button" data-full="/img/me/yukiminoideyu.webp" data-caption="Yukiminoideyu" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/me/yukiminoideyu.webp" alt="Yukiminoideyu 插圖" />
+								</button>
+								<button class="gallery-card" type="button" data-full="/img/me/orion.webp" data-caption="Orion" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/me/orion.webp" alt="Orion 插圖" />
+								</button>
+								<button class="gallery-card is-wide" type="button" data-full="/img/commission-bg.webp" data-caption="酷東西背景" data-author="Eden" data-author-url="https://example.com/eden">
+									<img src="/img/commission-bg.webp" alt="黃色與紫色星空背景" />
+								</button>
+							</div>
+						</div>
+
+						<p class="site-credit">
+							Made with
+							<span aria-hidden="true">💻</span>
+							by Eden
+						</p>
+					</section>
 				</div>
-			</section>
-
-			<section class="section gallery-section" id="gallery" aria-label="圖集" data-chrome="dark">
-				<div class="gallery-top-rule" aria-hidden="true"></div>
-				<h2 data-reveal="text">圖集</h2>
-				<p class="gallery-intro" data-reveal="text">
-					<span>見到我歡迎跟我抱抱打招呼！</span>
-					<span>請多多指教！</span>
-				</p>
-
-				<div class="gallery-marquee" data-gallery-marquee>
-					<div class="gallery-track">
-						<button class="gallery-card is-transition" type="button" data-full="/img/head.webp" data-caption="星光頭像" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/head.webp" alt="星光頭像" />
-						</button>
-						<button class="gallery-card" type="button" data-full="/img/cover-avatar.webp" data-caption="伸手打招呼的伊甸" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/cover-avatar.webp" alt="伸手打招呼的伊甸" />
-						</button>
-						<button class="gallery-card is-narrow" type="button" data-full="/img/feier.webp" data-caption="菲爾" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/feier.webp" alt="菲爾角色插圖" />
-						</button>
-						<button class="gallery-card" type="button" data-full="/img/me/yukiminoideyu.webp" data-caption="Yukiminoideyu" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/me/yukiminoideyu.webp" alt="Yukiminoideyu 插圖" />
-						</button>
-						<button class="gallery-card" type="button" data-full="/img/me/orion.webp" data-caption="Orion" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/me/orion.webp" alt="Orion 插圖" />
-						</button>
-						<button class="gallery-card is-wide" type="button" data-full="/img/commission-bg.webp" data-caption="酷東西背景" data-author="Eden" data-author-url="https://example.com/eden">
-							<img src="/img/commission-bg.webp" alt="黃色與紫色星空背景" />
-						</button>
-					</div>
-				</div>
-
-				<p class="site-credit">
-					Made with
-					<span aria-hidden="true">💻</span>
-					by Eden
-				</p>
-			</section>
+			</div>
 		</main>
 
 		<div class="lightbox" aria-hidden="true" role="dialog" aria-modal="true">

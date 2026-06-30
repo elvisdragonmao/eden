@@ -8,6 +8,8 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 const chrome = document.querySelector(".site-chrome");
 const menuToggle = document.querySelector(".menu-toggle");
 const drawer = document.querySelector(".mobile-drawer");
+const storyScroll = document.querySelector(".story-scroll");
+const coverScene = document.querySelector(".cover-scene");
 const galleryTrack = document.querySelector(".gallery-track");
 const lightbox = document.querySelector(".lightbox");
 const lightboxStage = document.querySelector(".lightbox-stage");
@@ -15,26 +17,14 @@ const lightboxImage = document.querySelector(".lightbox-image");
 const lightboxCaption = document.querySelector(".lightbox-caption p");
 const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
+let galleryMarqueeTween;
+let galleryMarqueeActive = false;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 function setChromeTheme(theme) {
 	if (!chrome) return;
 	chrome.dataset.theme = theme;
-}
-
-function initChromeThemes() {
-	const sections = gsap.utils.toArray("[data-chrome]");
-
-	sections.forEach(section => {
-		ScrollTrigger.create({
-			trigger: section,
-			start: "top 55%",
-			end: "bottom 45%",
-			onEnter: () => setChromeTheme(section.dataset.chrome),
-			onEnterBack: () => setChromeTheme(section.dataset.chrome)
-		});
-	});
 }
 
 function initMenu() {
@@ -91,7 +81,101 @@ function initPointerParallax() {
 	});
 }
 
-function initReveals() {
+function playInkSweep() {
+	if (!coverScene) return;
+	coverScene.classList.remove("is-ink-playing");
+	coverScene.classList.remove("is-ink-complete");
+	void coverScene.offsetWidth;
+	coverScene.classList.add("is-ink-playing");
+}
+
+function initInkSweep() {
+	if (!coverScene) return;
+
+	coverScene.addEventListener("animationend", event => {
+		if (!event.target.classList.contains("cover-avatar-color")) return;
+		coverScene.classList.add("is-ink-complete");
+	});
+}
+
+function baseRect(element) {
+	if (!element) return null;
+	const previousTransform = element.style.transform;
+	element.style.transform = "";
+	const rect = element.getBoundingClientRect();
+	element.style.transform = previousTransform;
+	return rect;
+}
+
+function clipInsetValue(selector, side) {
+	return () => {
+		const target = document.querySelector(selector);
+		const rect = baseRect(target);
+		if (!rect) return "0px";
+
+		const values = {
+			top: Math.max(0, rect.top),
+			right: Math.max(0, window.innerWidth - rect.right),
+			bottom: Math.max(0, window.innerHeight - rect.bottom),
+			left: Math.max(0, rect.left)
+		};
+
+		return `${values[side].toFixed(2)}px`;
+	};
+}
+
+function alignToElement(fromSelector, toSelector, axis) {
+	return () => {
+		const from = baseRect(document.querySelector(fromSelector));
+		const to = baseRect(document.querySelector(toSelector));
+		if (!from || !to) return 0;
+
+		if (axis === "x") return to.left + to.width / 2 - (from.left + from.width / 2);
+		if (axis === "y") return to.top + to.height / 2 - (from.top + from.height / 2);
+		if (axis === "scaleX") return to.width / from.width;
+		if (axis === "scaleY") return to.height / from.height;
+
+		return 0;
+	};
+}
+
+function setThemeByProgress(progress) {
+	if (progress < 0.22) {
+		setChromeTheme("cover");
+		return;
+	}
+
+	if (progress < 0.5) {
+		setChromeTheme("dark");
+		return;
+	}
+
+	if (progress < 0.82) {
+		setChromeTheme("light");
+		return;
+	}
+
+	setChromeTheme("dark");
+}
+
+function setGalleryMarqueeActive(isActive) {
+	if (!galleryMarqueeTween || !galleryTrack) return;
+	if (isActive === galleryMarqueeActive) return;
+
+	galleryMarqueeActive = isActive;
+
+	if (isActive) {
+		galleryMarqueeTween.resume();
+		return;
+	}
+
+	galleryMarqueeTween.pause(0);
+	gsap.set(galleryTrack, { x: 0 });
+}
+
+function initStoryTimeline() {
+	if (!storyScroll) return;
+
 	const mm = gsap.matchMedia();
 
 	mm.add(
@@ -101,216 +185,147 @@ function initReveals() {
 		},
 		context => {
 			const { mobile } = context.conditions;
+			let coverWasActive = false;
 
-			gsap.utils.toArray("[data-reveal]").forEach(element => {
-				const revealType = element.dataset.reveal;
-				let fromVars = { autoAlpha: 0, y: 28 };
+			gsap.set(".cover-section", { autoAlpha: 1 });
+			gsap.set(".cover-scene", {
+				autoAlpha: 1,
+				"--clip-top": "0px",
+				"--clip-right": "0px",
+				"--clip-bottom": "0px",
+				"--clip-left": "0px"
+			});
+			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
+			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
+			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
+			gsap.set(".commission-copy", { autoAlpha: 0, y: 36 });
+			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 28 });
+			gsap.set(".gallery-card", { autoAlpha: 0, y: 44 });
+			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 0, rotateY: -180, scale: 1 });
+			gsap.set(".commission-flip", {
+				autoAlpha: 0,
+				x: 0,
+				y: 0,
+				scaleX: 1,
+				scaleY: 1,
+				rotateX: 0,
+				clipPath: "inset(0px round 32px)",
+				transformPerspective: mobile ? 1000 : 1200,
+				transformOrigin: "50% 50%"
+			});
+			gsap.set(".flip-card", {
+				rotateY: 0,
+				transformPerspective: mobile ? 1000 : 1200,
+				transformOrigin: "50% 50%"
+			});
 
-				if (revealType === "about-title") {
-					fromVars = mobile ? { autoAlpha: 0, x: 72 } : { autoAlpha: 0, y: -72 };
+			const tl = gsap.timeline({
+				defaults: { ease: "none" },
+				scrollTrigger: {
+					id: "story",
+					trigger: storyScroll,
+					start: "top top",
+					end: "bottom bottom",
+					scrub: 1,
+					invalidateOnRefresh: true,
+					onUpdate: self => {
+						setThemeByProgress(self.progress);
+						setGalleryMarqueeActive(self.progress > 0.955);
+
+						const isCoverActive = self.progress < 0.035;
+						if (isCoverActive && !coverWasActive) playInkSweep();
+						coverWasActive = isCoverActive;
+					}
 				}
+			});
 
-				if (revealType === "soft") {
-					fromVars = { autoAlpha: 0, y: 24, scale: 0.985 };
-				}
+			tl.to({}, { duration: 1 }, 0);
+			tl.to(".about-section", { autoAlpha: 1, duration: 0.12 }, 0.08);
+			tl.to(".about-section", { "--about-grid-opacity": 1, duration: 0.18 }, 0.1);
+			tl.to(
+				".cover-scene",
+				{
+					"--clip-top": clipInsetValue(".about-portrait", "top"),
+					"--clip-right": clipInsetValue(".about-portrait", "right"),
+					"--clip-bottom": clipInsetValue(".about-portrait", "bottom"),
+					"--clip-left": clipInsetValue(".about-portrait", "left"),
+					duration: 0.22
+				},
+				0.1
+			);
+			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
+			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
+			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, 0.24);
+			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
+			tl.to(".about-head", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.24);
+			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.06 }, 0.28);
 
-				const isGalleryIntro = element.classList.contains("gallery-intro");
-
-				gsap.fromTo(element, fromVars, {
+			tl.to(".commission-section", { autoAlpha: 1, duration: 0.12 }, 0.42);
+			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.44);
+			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.44);
+			tl.fromTo(
+				".commission-flip",
+				{
+					autoAlpha: 0,
+					x: alignToElement(".commission-flip", ".about-head", "x"),
+					y: alignToElement(".commission-flip", ".about-head", "y"),
+					scaleX: alignToElement(".commission-flip", ".about-head", "scaleX"),
+					scaleY: alignToElement(".commission-flip", ".about-head", "scaleY"),
+					rotateX: mobile ? -5 : -7
+				},
+				{
 					autoAlpha: 1,
 					x: 0,
 					y: 0,
-					scale: 1,
-					ease: "none",
-					scrollTrigger: {
-						trigger: element,
-						start: isGalleryIntro ? "top 110%" : "top 88%",
-						end: isGalleryIntro ? "top 90%" : "top 58%",
-						scrub: 0.7
-					}
-				});
-			});
-
-			gsap.fromTo(
-				".about-portrait",
-				{
-					scale: mobile ? 1.08 : 1.16,
-					maskSize: mobile ? "128% 128%" : "142% 142%",
-					webkitMaskSize: mobile ? "128% 128%" : "142% 142%"
+					scaleX: 1,
+					scaleY: 1,
+					rotateX: 0,
+					duration: 0.16
 				},
-				{
-					scale: 1,
-					maskSize: "100% 100%",
-					webkitMaskSize: "100% 100%",
-					ease: "none",
-					scrollTrigger: {
-						trigger: ".about-section",
-						start: "top 82%",
-						end: "top 18%",
-						scrub: 1
-					}
-				}
+				0.43
 			);
+			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.5);
+			tl.to(".commission-flip", { scaleX: 1.12, scaleY: 1.12, rotateX: mobile ? 6 : 8, duration: 0.18 }, 0.62);
+			tl.to(".flip-card", { rotateY: 180, duration: 0.18 }, 0.62);
+			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.1 }, 0.66);
 
-			gsap.fromTo(
-				".about-head",
+			tl.to(".gallery-section", { autoAlpha: 1, duration: 0.12 }, 0.75);
+			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.1 }, 0.78);
+			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.12 }, 0.82);
+			tl.to(
+				".commission-flip",
 				{
-					scale: mobile ? 1.06 : 1.12,
-					maskSize: "130% 130%",
-					webkitMaskSize: "130% 130%"
+					x: alignToElement(".commission-flip", ".gallery-card.is-transition", "x"),
+					y: alignToElement(".commission-flip", ".gallery-card.is-transition", "y"),
+					scaleX: alignToElement(".commission-flip", ".gallery-card.is-transition", "scaleX"),
+					scaleY: alignToElement(".commission-flip", ".gallery-card.is-transition", "scaleY"),
+					rotateX: 0,
+					clipPath: "inset(0px round 29px)",
+					duration: 0.16
 				},
-				{
-					scale: 1,
-					maskSize: "100% 100%",
-					webkitMaskSize: "100% 100%",
-					ease: "none",
-					scrollTrigger: {
-						trigger: ".about-section",
-						start: "top 72%",
-						end: "top 16%",
-						scrub: 1
-					}
-				}
+				0.8
 			);
+			tl.to(".flip-card", { rotateY: 360, duration: 0.16 }, 0.8);
+			tl.to(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, duration: 0.04 }, 0.935);
+			tl.to(".commission-flip", { autoAlpha: 0, duration: 0.04 }, 0.94);
+			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.92);
+
+			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
+			playInkSweep();
 		}
 	);
 }
 
-function initCommissionFlip() {
-	const mm = gsap.matchMedia();
-
-	mm.add("(min-width: 901px)", () => {
-		gsap.set(".commission-flip", {
-			y: 0,
-			scale: 1,
-			rotateX: 0,
-			transformPerspective: 1200,
-			transformOrigin: "50% 52%"
-		});
-		gsap.set(".flip-card", {
-			rotateY: 0,
-			transformPerspective: 1200,
-			transformOrigin: "50% 50%"
-		});
-
-		gsap
-			.timeline({
-				scrollTrigger: {
-					trigger: ".commission-section",
-					start: "top bottom",
-					end: "top top",
-					scrub: 1
-				}
-			})
-			.fromTo(".commission-flip", { y: "-34vh", scale: 0.42 }, { y: 0, scale: 1, ease: "none" });
-
-		gsap
-			.timeline({
-				scrollTrigger: {
-					trigger: ".commission-section",
-					start: "top top",
-					end: "bottom top",
-					scrub: 1
-				}
-			})
-			.to(".commission-flip", {
-				scale: 1.12,
-				rotateX: 8,
-				ease: "none"
-			})
-			.to(
-				".flip-card",
-				{
-					rotateY: 180,
-					ease: "none"
-				},
-				0
-			)
-			.to(
-				".commission-copy",
-				{
-					autoAlpha: 0,
-					y: -32,
-					ease: "none"
-				},
-				0.22
-			);
-
-		gsap.fromTo(
-			".gallery-card.is-transition",
-			{ autoAlpha: 0, y: -260, scale: 2.15, rotateY: -180 },
-			{
-				autoAlpha: 1,
-				y: 0,
-				scale: 1,
-				rotateY: 0,
-				ease: "none",
-				scrollTrigger: {
-					trigger: ".gallery-section",
-					start: "top bottom",
-					end: "top 48%",
-					scrub: 1
-				}
-			}
-		);
-	});
-
-	mm.add("(max-width: 900px)", () => {
-		gsap.set(".commission-flip", {
-			y: 0,
-			scale: 1,
-			rotateX: 0,
-			transformPerspective: 1000,
-			transformOrigin: "50% 45%"
-		});
-		gsap.set(".flip-card", {
-			rotateY: 0,
-			transformPerspective: 1000,
-			transformOrigin: "50% 50%"
-		});
-
-		gsap
-			.timeline({
-				scrollTrigger: {
-					trigger: ".commission-section",
-					start: "top bottom",
-					end: "top top",
-					scrub: 1
-				}
-			})
-			.fromTo(".commission-flip", { y: -260, scale: 0.44 }, { y: 0, scale: 1, ease: "none" });
-
-		gsap
-			.timeline({
-				scrollTrigger: {
-					trigger: ".commission-section",
-					start: "top top",
-					end: "bottom top",
-					scrub: 1
-				}
-			})
-			.to(".commission-flip", {
-				scale: 1.08,
-				rotateX: 6,
-				ease: "none"
-			})
-			.to(
-				".flip-card",
-				{
-					rotateY: 180,
-					ease: "none"
-				},
-				0
-			)
-			.to(
-				".commission-copy",
-				{
-					autoAlpha: 0,
-					y: -24,
-					ease: "none"
-				},
-				0.2
-			);
+function initReducedStory() {
+	setChromeTheme("cover");
+	gsap.set(".section", { autoAlpha: 0 });
+	gsap.set(".cover-section", { autoAlpha: 1 });
+	gsap.set(".cover-scene", {
+		autoAlpha: 1,
+		"--clip-top": "0px",
+		"--clip-right": "0px",
+		"--clip-bottom": "0px",
+		"--clip-left": "0px"
 	});
 }
 
@@ -336,13 +351,22 @@ function initGalleryMarquee() {
 			x: -distance,
 			duration: 34,
 			ease: "none",
-			repeat: -1
+			repeat: -1,
+			paused: true
 		});
 
-		galleryTrack.addEventListener("pointerenter", () => tween.pause());
-		galleryTrack.addEventListener("pointerleave", () => tween.resume());
+		galleryMarqueeTween = tween;
+
+		galleryTrack.addEventListener("pointerenter", () => {
+			if (galleryMarqueeActive) tween.pause();
+		});
+		galleryTrack.addEventListener("pointerleave", () => {
+			if (galleryMarqueeActive) tween.resume();
+		});
 
 		return () => {
+			galleryMarqueeTween = null;
+			galleryMarqueeActive = false;
 			tween.kill();
 			gsap.set(galleryTrack, { clearProps: "transform" });
 		};
@@ -469,13 +493,12 @@ function initLightbox() {
 }
 
 if (!prefersReducedMotion) {
-	initChromeThemes();
+	initInkSweep();
 	initPointerParallax();
-	initReveals();
-	initCommissionFlip();
 	initGalleryMarquee();
+	initStoryTimeline();
 } else {
-	setChromeTheme("light");
+	initReducedStory();
 }
 
 initMenu();

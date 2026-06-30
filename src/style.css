@@ -8,14 +8,16 @@
 
 :root {
 	--ink: #050505;
-	--blue-ink: #003562;
+	--blue-ink: #003163;
 	--violet-ink: #1a0b49;
 	--paper: #ffffff;
 	--line-light: rgba(255, 255, 255, 0.7);
 	--line-dark: rgba(0, 0, 0, 0.1);
 	--muted: #707070;
-	--chrome-color: rgba(255, 255, 255, 0.86);
-	--chrome-line: rgba(255, 255, 255, 0.7);
+	--chrome-nav-color: #003163;
+	--chrome-icon-color: #ffffff;
+	--chrome-line: rgba(255, 255, 255, 0.88);
+	--chrome-width: 2px;
 	--frame-inset: 16px;
 	--frame-radius: 32px;
 	--mx: 0;
@@ -73,32 +75,64 @@ button {
 	border: 0;
 }
 
-.section {
+.story-scroll {
 	position: relative;
-	min-height: 100svh;
-	overflow: hidden;
+	height: 520svh;
 	background: var(--paper);
 }
 
+.story-anchor {
+	position: absolute;
+	top: var(--anchor-top);
+	left: 0;
+	width: 1px;
+	height: 1px;
+	pointer-events: none;
+}
+
+.story-stage {
+	position: sticky;
+	top: 0;
+	height: 100svh;
+	overflow: hidden;
+	background: var(--paper);
+	isolation: isolate;
+}
+
+.section {
+	position: absolute;
+	inset: 0;
+	min-height: 100svh;
+	overflow: hidden;
+	background: transparent;
+	visibility: hidden;
+}
+
 .site-chrome {
-	--chrome-color: rgba(255, 255, 255, 0.9);
-	--chrome-line: rgba(255, 255, 255, 0.7);
 	position: relative;
 	z-index: 80;
-	color: var(--chrome-color);
+	color: var(--chrome-nav-color);
 	transition:
 		color 0.45s ease,
 		border-color 0.45s ease;
 }
 
-.site-chrome[data-theme="dark"] {
-	--chrome-color: rgba(0, 0, 0, 0.9);
-	--chrome-line: rgba(0, 0, 0, 0.1);
+.site-chrome[data-theme="cover"] {
+	--chrome-nav-color: #003163;
+	--chrome-icon-color: #ffffff;
+	--chrome-line: rgba(255, 255, 255, 0.9);
 }
 
-.site-chrome[data-theme="light"] .desktop-nav,
-.site-chrome[data-theme="light"] .social-rail {
-	mix-blend-mode: difference;
+.site-chrome[data-theme="light"] {
+	--chrome-nav-color: rgba(255, 255, 255, 0.92);
+	--chrome-icon-color: rgba(255, 255, 255, 0.92);
+	--chrome-line: rgba(255, 255, 255, 0.76);
+}
+
+.site-chrome[data-theme="dark"] {
+	--chrome-nav-color: rgba(0, 0, 0, 0.9);
+	--chrome-icon-color: rgba(0, 0, 0, 0.9);
+	--chrome-line: rgba(0, 0, 0, 0.1);
 }
 
 .desktop-frame {
@@ -106,7 +140,7 @@ button {
 	inset: var(--frame-inset);
 	z-index: 80;
 	pointer-events: none;
-	border: 1.5px solid var(--chrome-line);
+	border: var(--chrome-width) solid var(--chrome-line);
 	border-radius: var(--frame-radius);
 }
 
@@ -120,11 +154,11 @@ button {
 	justify-content: center;
 	height: 48px;
 	gap: 48px;
-	border-bottom: 1.5px solid var(--chrome-line);
+	color: var(--chrome-nav-color);
+	border-bottom: var(--chrome-width) solid var(--chrome-line);
 	font-size: 16px;
 	line-height: 1;
 	white-space: nowrap;
-	color: var(--chrome-color);
 	pointer-events: auto;
 	transition:
 		color 0.45s ease,
@@ -146,9 +180,12 @@ button {
 	justify-content: center;
 	width: 48px;
 	gap: 24px;
-	color: var(--chrome-color);
+	color: var(--chrome-icon-color);
+	border-right: var(--chrome-width) solid var(--chrome-line);
 	pointer-events: auto;
-	transition: color 0.45s ease;
+	transition:
+		color 0.45s ease,
+		border-color 0.45s ease;
 }
 
 .social-rail a,
@@ -174,9 +211,25 @@ button {
 }
 
 .cover-section {
+	z-index: 5;
 	color: var(--paper);
 	isolation: isolate;
+	visibility: visible;
+	pointer-events: none;
+}
+
+.cover-scene {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	--clip-top: 0px;
+	--clip-right: 0px;
+	--clip-bottom: 0px;
+	--clip-left: 0px;
 	background: #a7b6bb;
+	clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left) round 0px);
+	pointer-events: none;
+	will-change: clip-path, opacity, transform;
 }
 
 .cover-bg,
@@ -212,9 +265,9 @@ button {
 .cover-avatar {
 	position: absolute;
 	z-index: 2;
-	top: -22vh;
-	left: calc(50% + 70px);
-	width: clamp(1180px, 132vw, 1994px);
+	top: -22svh;
+	left: 54.6vw;
+	width: min(132vw, 205svh);
 	aspect-ratio: 1500 / 2066;
 	pointer-events: none;
 	transform: translateX(-50%) translate3d(calc(var(--mx) * 24px), calc(var(--my) * 18px), 0) rotate(calc(var(--mx) * 1.2deg));
@@ -244,7 +297,15 @@ button {
 	-webkit-mask-repeat: no-repeat;
 	-webkit-mask-size: auto 100%;
 	-webkit-mask-position: 0% 50%;
-	animation: ink-sweep 2.8s steps(48, end) infinite alternate;
+}
+
+.cover-scene.is-ink-playing .cover-avatar-color {
+	animation: ink-sweep 2.45s steps(48, end) forwards;
+}
+
+.cover-scene.is-ink-complete .cover-avatar-color {
+	mask-image: none;
+	-webkit-mask-image: none;
 }
 
 .scroll-cue {
@@ -259,6 +320,7 @@ button {
 	line-height: 1;
 	color: #fff;
 	mix-blend-mode: difference;
+	pointer-events: auto;
 }
 
 .scroll-arrow {
@@ -291,8 +353,27 @@ button {
 }
 
 .about-section {
+	z-index: 2;
 	min-height: 100svh;
 	background: #fff;
+	opacity: 0;
+	--about-grid-opacity: 0;
+}
+
+.about-section::before {
+	position: absolute;
+	inset: -4svh -4vw;
+	content: "";
+	background-image: linear-gradient(rgba(0, 49, 99, 0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 49, 99, 0.11) 1px, transparent 1px);
+	background-position:
+		calc(50% + var(--mx) * 18px) calc(50% + var(--my) * 14px),
+		calc(50% + var(--mx) * 18px) calc(50% + var(--my) * 14px);
+	background-size: 48px 48px;
+	opacity: var(--about-grid-opacity);
+	pointer-events: none;
+	transform: translate3d(calc(var(--mx) * 8px), calc(var(--my) * 6px), 0);
+	transition: opacity 0.2s linear;
+	will-change: opacity, transform;
 }
 
 .about-shell {
@@ -331,7 +412,7 @@ button {
 .about-rule {
 	position: absolute;
 	left: clamp(48px, 4.2vw, 64px);
-	width: clamp(560px, 53.4vw, 807px);
+	width: calc(61.8vw - clamp(48px, 4.2vw, 64px));
 	pointer-events: none;
 	border-color: var(--line-dark);
 	border-style: solid;
@@ -407,19 +488,23 @@ button {
 	top: clamp(560px, 67.1vh, 659px);
 	left: clamp(440px, 37.8vw, 572px);
 	z-index: 3;
+	--head-mask-size: 100%;
 	width: clamp(216px, 16.9vw, 255px);
 	aspect-ratio: 255 / 255;
+	background:
+		linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)),
+		url("/img/cover-bg.webp") center / cover;
+	mask-size: var(--head-mask-size) var(--head-mask-size);
+	-webkit-mask-size: var(--head-mask-size) var(--head-mask-size);
 	transition:
-		transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+		--head-mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
 		mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
 		-webkit-mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 	will-change: transform, opacity;
 }
 
 .about-head:hover {
-	transform: scale(1.035);
-	mask-size: 106% 106%;
-	-webkit-mask-size: 106% 106%;
+	--head-mask-size: 108%;
 }
 
 .about-head img,
@@ -429,12 +514,21 @@ button {
 	object-fit: cover;
 }
 
+.about-head img {
+	transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-head:hover img {
+	transform: scale(1.04);
+}
+
 .about-portrait {
 	position: absolute;
 	top: clamp(76px, 11vh, 108px);
 	right: clamp(60px, 4vw, 60px);
 	width: clamp(420px, 35.3vw, 533px);
 	height: clamp(640px, 82.1vh, 806px);
+	background: url("/img/cover-bg.webp") center / cover;
 	will-change: transform, opacity, mask-size;
 }
 
@@ -445,9 +539,11 @@ button {
 }
 
 .commission-section {
+	z-index: 3;
 	min-height: 100svh;
 	color: var(--violet-ink);
 	background: #f4b934;
+	opacity: 0;
 	perspective: 1200px;
 }
 
@@ -488,10 +584,12 @@ button {
 	z-index: 2;
 	width: clamp(424px, 38vw, 575px);
 	height: clamp(624px, 86.3vh, 847px);
+	opacity: 0;
 	transform: translateX(-50%);
 	transform-style: preserve-3d;
 	pointer-events: none;
-	will-change: transform, opacity;
+	clip-path: inset(0 round 32px);
+	will-change: transform, opacity, clip-path;
 }
 
 .flip-card {
@@ -516,7 +614,7 @@ button {
 }
 
 .flip-front {
-	background: transparent;
+	background: url("/img/cover-bg.webp") center / cover;
 }
 
 .flip-back {
@@ -566,9 +664,11 @@ button {
 }
 
 .gallery-section {
+	z-index: 4;
 	min-height: 100svh;
 	background: #fff;
 	color: #000;
+	opacity: 0;
 }
 
 .gallery-top-rule {
@@ -648,6 +748,11 @@ button {
 		transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
 		filter 0.35s ease;
 	will-change: transform, opacity;
+}
+
+.gallery-card.is-transition {
+	opacity: 0;
+	transform-origin: 50% 50%;
 }
 
 .gallery-card:hover {
@@ -820,7 +925,7 @@ button {
 		height: 40px;
 		place-items: center;
 		color: var(--blue-ink);
-		border: 1px solid currentColor;
+		border: var(--chrome-width) solid currentColor;
 		background: rgba(255, 255, 255, 0.04);
 		mix-blend-mode: normal;
 	}
@@ -917,9 +1022,8 @@ button {
 
 	.cover-avatar {
 		top: 20.4svh;
-		left: calc(50% + 34px);
-		width: 132vw;
-		min-width: 529px;
+		left: 58.6vw;
+		width: min(138vw, 78svh);
 		transform: translateX(-50%) translate3d(calc(var(--mx) * 10px), calc(var(--my) * 10px), 0) rotate(calc(var(--mx) * 0.7deg));
 	}
 
@@ -1019,8 +1123,9 @@ button {
 	.commission-flip {
 		top: 233px;
 		left: calc(50% + 76px);
-		width: 509px;
-		height: 750px;
+		width: min(130vw, 88svh);
+		height: auto;
+		aspect-ratio: 575 / 847;
 	}
 
 	.flip-face {
