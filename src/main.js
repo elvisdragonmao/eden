@@ -129,11 +129,11 @@ function coverStartOffsetY() {
 }
 
 function coverContentStartOffsetX() {
-	return -coverStartOffsetX() / coverStartScale;
+	return -coverStartOffsetX() / coverStartScale - clamp(window.innerWidth * 0.016, 16, 24);
 }
 
 function coverContentStartOffsetY() {
-	return -coverStartOffsetY() / coverStartScale;
+	return -coverStartOffsetY() / coverStartScale - 2;
 }
 
 function resetCoverAvatarLayout() {

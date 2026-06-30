@@ -272,9 +272,9 @@ button {
 }
 
 .cover-bg {
-	inset: 0 calc((100vw - var(--cover-scene-width)) / 2);
+	inset: -12vh calc((100vw - var(--cover-scene-width)) / 2 - 12vw);
 	background-image: url("/img/cover-bg.webp");
-	transform: translate3d(calc(var(--mx) * -72px), calc(var(--my) * -56px), -32px) rotateX(calc(var(--my) * -3.2deg)) rotateY(calc(var(--mx) * 4.8deg)) scale(1.12);
+	transform: translate3d(calc(var(--mx) * -72px), calc(var(--my) * -56px), -32px) rotateX(calc(var(--my) * -3.2deg)) rotateY(calc(var(--mx) * 4.8deg)) scale(1.16);
 	transform-origin: center;
 }
 
@@ -1045,7 +1045,7 @@ button {
 
 	.cover-bg {
 		background-position: 50% 50%;
-		transform: translate3d(calc(var(--mx) * -30px), calc(var(--my) * -24px), -18px) rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 2.2deg)) scale(1.06);
+		transform: translate3d(calc(var(--mx) * -30px), calc(var(--my) * -24px), -18px) rotateX(calc(var(--my) * -1.4deg)) rotateY(calc(var(--mx) * 2.2deg)) scale(1.12);
 	}
 
 	.cover-title {
