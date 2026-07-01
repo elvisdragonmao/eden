@@ -410,7 +410,7 @@ function initStoryTimeline() {
 				y: 0,
 				scale: initialCoverScale,
 				rotateX: 0,
-				rotateY: -15,
+				rotateY: 0,
 				rotation: 0,
 				transformPerspective: 1200
 			});
@@ -419,7 +419,7 @@ function initStoryTimeline() {
 				y: 0,
 				scale: 1 / initialCoverScale,
 				rotateX: 0,
-				rotateY: 15,
+				rotateY: 0,
 				rotation: 0,
 				transformOrigin: "50% 50%"
 			});
@@ -493,7 +493,7 @@ function initStoryTimeline() {
 					y: 0,
 					scale: () => initialCoverScale * (mobile ? 0.72 : 0.68),
 					rotateX: 0,
-					rotateY: -12,
+					rotateY: 0,
 					rotation: 0,
 					duration: 0.08,
 					ease: "power3.out"
@@ -504,7 +504,7 @@ function initStoryTimeline() {
 				".cover-content",
 				{
 					scale: () => 0.96 / (initialCoverScale * (mobile ? 0.72 : 0.68)),
-					rotateY: 12,
+					rotateY: 0,
 					duration: 0.08,
 					ease: "power3.out"
 				},
@@ -656,7 +656,7 @@ function initReducedStory() {
 		y: 0,
 		scale: initialCoverScale,
 		rotateX: 0,
-		rotateY: -15,
+		rotateY: 0,
 		rotation: 0,
 		transformPerspective: 1200
 	});
@@ -665,7 +665,7 @@ function initReducedStory() {
 		y: 0,
 		scale: 1 / initialCoverScale,
 		rotateX: 0,
-		rotateY: 15,
+		rotateY: 0,
 		rotation: 0,
 		transformOrigin: "50% 50%"
 	});
