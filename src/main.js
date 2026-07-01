@@ -27,8 +27,8 @@ const coverFinalAvatarOffset = 28;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const coverMaskStartOffset = mobile => ({
-	x: mobile ? -18 : -48,
-	y: mobile ? -16 : -42
+	x: mobile ? -26 : -64,
+	y: mobile ? -22 : -54
 });
 
 function setChromeTheme(theme) {
@@ -385,9 +385,9 @@ function initStoryTimeline() {
 				x: initialMaskOffset.x,
 				y: initialMaskOffset.y,
 				scale: initialCoverScale,
-				rotateX: mobile ? -0.8 : -1.4,
-				rotateY: 0,
-				rotation: 0,
+				rotateX: mobile ? 1.8 : 3.8,
+				rotateY: mobile ? -1.2 : -3.2,
+				rotation: mobile ? -0.8 : -1.6,
 				transformPerspective: 1200
 			});
 			syncCoverContentToMask();
@@ -456,16 +456,16 @@ function initStoryTimeline() {
 			tl.to(
 				".cover-scene",
 				{
-					x: 0,
-					y: 0,
-					scale: () => initialCoverScale * (mobile ? 0.86 : 0.82),
-					rotateX: mobile ? -1.6 : -2.4,
-					rotateY: 0,
-					rotation: 0,
-					duration: 0.075,
+					x: () => (mobile ? -8 : -16),
+					y: () => (mobile ? -8 : -18),
+					scale: () => initialCoverScale * (mobile ? 0.78 : 0.74),
+					rotateX: mobile ? 1.2 : 2.2,
+					rotateY: mobile ? -0.8 : -1.6,
+					rotation: mobile ? -0.45 : -0.8,
+					duration: 0.06,
 					ease: "power3.out"
 				},
-				0.1
+				0.075
 			);
 			tl.to(
 				".cover-scene",
@@ -473,15 +473,15 @@ function initStoryTimeline() {
 					x: alignToElement(".cover-scene", ".about-portrait", "x"),
 					y: alignToElement(".cover-scene", ".about-portrait", "y"),
 					scale: scaleToElementHeight(".cover-scene", ".about-portrait"),
-					rotateX: mobile ? -3.2 : -5.8,
+					rotateX: 0,
 					rotateY: 0,
 					rotation: 0,
-					duration: 0.165,
+					duration: 0.185,
 					ease: "power2.inOut"
 				},
-				0.175
+				0.125
 			);
-			tl.to(".cover-world", { scale: mobile ? 0.97 : 0.94, rotateX: mobile ? -1.2 : -2.6, duration: 0.24, ease: "power1.inOut" }, 0.14);
+			tl.to(".cover-world", { scale: mobile ? 0.98 : 0.96, rotateX: 0, duration: 0.22, ease: "power1.inOut" }, 0.115);
 			tl.to(
 				".cover-avatar",
 				{
@@ -588,9 +588,9 @@ function initReducedStory() {
 		x: initialMaskOffset.x,
 		y: initialMaskOffset.y,
 		scale: initialCoverScale,
-		rotateX: window.matchMedia("(max-width: 900px)").matches ? -0.8 : -1.4,
-		rotateY: 0,
-		rotation: 0,
+		rotateX: window.matchMedia("(max-width: 900px)").matches ? 1.8 : 3.8,
+		rotateY: window.matchMedia("(max-width: 900px)").matches ? -1.2 : -3.2,
+		rotation: window.matchMedia("(max-width: 900px)").matches ? -0.8 : -1.6,
 		transformPerspective: 1200
 	});
 	syncCoverContentToMask();
