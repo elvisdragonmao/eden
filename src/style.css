@@ -655,7 +655,7 @@ button {
 	top: 50%;
 	left: 50%;
 	z-index: 3;
-	width: clamp(372px, 35.6vw, 540px);
+	width: clamp(430px, 40vw, 640px);
 	margin: 0;
 	transform: translate3d(calc(-50% + var(--mx) * 18px), calc(-50% + var(--my) * 14px), 0);
 	will-change: transform, opacity;
@@ -673,9 +673,8 @@ button {
 	overflow: hidden;
 	opacity: 0;
 	pointer-events: none;
-	transform: rotate(var(--portal-rotation, 0deg)) rotateY(var(--portal-rotate-y, 0deg));
+	transform: rotate(var(--portal-rotation, 0deg));
 	transform-origin: var(--portal-origin-x, 50vw) var(--portal-origin-y, 50svh);
-	transform-style: preserve-3d;
 	mask-image: url("/img/mask/mask-portrait.svg");
 	mask-mode: alpha;
 	mask-position: var(--portal-left, 50vw) var(--portal-top, 50svh);
@@ -692,7 +691,7 @@ button {
 	position: absolute;
 	inset: 0;
 	overflow: hidden;
-	transform: translate3d(0, var(--portal-world-y, 0px), 0) rotateY(var(--portal-world-rotate-y, 0deg)) rotate(var(--portal-world-rotation, 0deg));
+	transform: translate3d(0, var(--portal-world-y, 0px), 0) rotate(var(--portal-world-rotation, 0deg));
 	transform-origin: var(--portal-origin-x, 50vw) var(--portal-origin-y, 50svh);
 	will-change: transform;
 }
@@ -1180,7 +1179,7 @@ button {
 
 	.commission-head {
 		top: 56%;
-		width: min(108vw, 462px);
+		width: min(128vw, 540px);
 		transform: translate3d(calc(-50% + var(--mx) * 10px), calc(-50% + var(--my) * 8px), 0);
 	}
 

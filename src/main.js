@@ -22,6 +22,9 @@ let galleryMarqueeActive = false;
 let syncCoverParallaxProgress = () => {};
 const coverMaskAspect = 533 / 806;
 const portalMaskAspect = 533 / 806;
+const portalTurnClip = "polygon(48.6% 4%, 52.4% 0%, 53.2% 100%, 49.1% 96%)";
+const portalMidTurnClip = "polygon(17% -8%, 82% -12%, 87% 112%, 21% 106%)";
+const portalFlatClip = "polygon(-12% -12%, 112% -12%, 112% 112%, -12% 112%)";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -330,7 +333,7 @@ function exitFlyPortalRect() {
 	};
 }
 
-function portalVars(rectGetter, { rotation = 0, rotateY = 0, worldY = 0 } = {}) {
+function portalVars(rectGetter, { rotation = 0, worldY = 0 } = {}) {
 	const readRect = () => rectGetter();
 
 	return {
@@ -347,9 +350,7 @@ function portalVars(rectGetter, { rotation = 0, rotateY = 0, worldY = 0 } = {}) 
 		"--portal-origin-x": () => `${readRect().cx}px`,
 		"--portal-origin-y": () => `${readRect().cy}px`,
 		"--portal-rotation": () => `${rotation}deg`,
-		"--portal-rotate-y": () => `${rotateY}deg`,
 		"--portal-world-rotation": () => `${-rotation}deg`,
-		"--portal-world-rotate-y": () => `${-rotateY}deg`,
 		"--portal-world-y": () => `${worldY}px`
 	};
 }
@@ -450,11 +451,11 @@ function initStoryTimeline() {
 			gsap.set(".commission-bg", { autoAlpha: 0 });
 			gsap.set(".commission-copy", { autoAlpha: 0, y: 0 });
 			gsap.set(".commission-head:not(.commission-portal-head)", { autoAlpha: 0, y: 0 });
-			gsap.set(".commission-portal", { autoAlpha: 0, ...portalVars(pinchedFullPortalRect) });
-			gsap.set(".gallery-section", { autoAlpha: 0, y: "100vh" });
-			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 48 });
-			gsap.set(".gallery-card", { autoAlpha: 0, y: 84 });
-			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 104, rotateY: 0, scale: 1 });
+			gsap.set(".commission-portal", { autoAlpha: 0, clipPath: portalTurnClip, ...portalVars(pinchedFullPortalRect) });
+			gsap.set(".gallery-section", { autoAlpha: 1, y: "138vh" });
+			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0 });
+			gsap.set(".gallery-card", { autoAlpha: 1, y: 0 });
+			gsap.set(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, scale: 1 });
 			const tl = gsap.timeline({
 				defaults: { ease: "none" },
 				scrollTrigger: {
@@ -575,47 +576,44 @@ function initStoryTimeline() {
 				0.43
 			);
 			tl.set(".about-head", { autoAlpha: 0 }, 0.555);
-			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), autoAlpha: 1 }, 0.555);
+			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), clipPath: portalTurnClip, autoAlpha: 1 }, 0.555);
 			tl.to(
 				".commission-portal",
 				{
 					...portalVars(fullPortalRect),
 					autoAlpha: 1,
-					duration: 0.16,
+					duration: 0.2,
 					ease: "power2.out"
 				},
 				0.555
 			);
-			tl.set(".commission-bg, .commission-copy, .commission-head:not(.commission-portal-head)", { autoAlpha: 1, y: 0 }, 0.705);
-			tl.set(".about-section", { autoAlpha: 0 }, 0.705);
-			tl.set(".commission-portal", { autoAlpha: 0 }, 0.72);
-
-			tl.set(".commission-portal", { ...portalVars(fullPortalRect), autoAlpha: 1 }, 0.735);
-			tl.set(".commission-bg, .commission-copy, .commission-head:not(.commission-portal-head)", { autoAlpha: 0 }, 0.735);
-			tl.to(".gallery-section", { autoAlpha: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.74);
+			tl.to(".commission-portal", { clipPath: portalMidTurnClip, duration: 0.12, ease: "power1.out" }, 0.555);
+			tl.to(".commission-portal", { clipPath: portalFlatClip, duration: 0.12, ease: "power2.inOut" }, 0.675);
+			tl.set(".about-section", { autoAlpha: 0 }, 0.755);
 			tl.to(
 				".commission-portal",
 				{
 					...portalVars(exitCoverPortalRect, { rotation: mobile ? -3 : -5, worldY: mobile ? -64 : -96 }),
+					clipPath: portalFlatClip,
+					autoAlpha: 1,
 					duration: 0.17,
 					ease: "power2.inOut"
 				},
-				0.735
+				0.78
 			);
-			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.1 }, 0.79);
-			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.006, duration: 0.1 }, 0.82);
+			tl.to(".gallery-section", { y: 0, duration: 0.25, ease: "none" }, 0.84);
 			tl.to(
 				".commission-portal",
 				{
 					...portalVars(exitFlyPortalRect, { rotation: mobile ? -6 : -9, worldY: mobile ? -104 : -152 }),
+					clipPath: portalFlatClip,
 					autoAlpha: 0,
-					duration: 0.14,
+					duration: 0.2,
 					ease: "power2.in"
 				},
-				0.84
+				0.92
 			);
-			tl.to(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, duration: 0.1 }, 0.88);
-			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.92);
+			tl.to(".commission-section", { autoAlpha: 0, duration: 0.12 }, 1.04);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
 			playInkSweep();
