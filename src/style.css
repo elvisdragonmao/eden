@@ -437,7 +437,10 @@ button {
 }
 
 .about-title-small {
+	display: inline-block;
 	font-size: 0.618em;
+	margin-inline: -0.08em;
+	transform: translateY(-0.04em);
 }
 
 .about-rule {
