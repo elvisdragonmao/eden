@@ -222,6 +222,14 @@ button {
 	pointer-events: none;
 }
 
+.cover-parallax-frame {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	transform: translate3d(calc(var(--cover-mx) * -34px), calc(var(--cover-my) * -28px), 0);
+	will-change: transform;
+}
+
 .cover-scene {
 	position: absolute;
 	top: 0;
@@ -1094,6 +1102,10 @@ button {
 
 	.cover-section {
 		min-height: 100svh;
+	}
+
+	.cover-parallax-frame {
+		transform: translate3d(calc(var(--cover-mx) * -18px), calc(var(--cover-my) * -16px), 0);
 	}
 
 	.cover-bg {

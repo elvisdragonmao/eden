@@ -21,15 +21,9 @@ let galleryMarqueeTween;
 let galleryMarqueeActive = false;
 let syncCoverParallaxProgress = () => {};
 const coverMaskAspect = 533 / 806;
-const coverAvatarAspect = 1500 / 2066;
 const portalMaskAspect = 533 / 806;
-const coverFinalAvatarOffset = 28;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-const coverMaskStartOffset = mobile => ({
-	x: mobile ? -26 : -64,
-	y: mobile ? -22 : -54
-});
 
 function setChromeTheme(theme) {
 	if (!chrome) return;
@@ -175,27 +169,6 @@ function readCoverAvatarLayout() {
 		left: style.left,
 		width: style.width
 	};
-}
-
-function syncCoverContentToMask() {
-	if (!coverScene) return;
-
-	const scale = Number(gsap.getProperty(coverScene, "scale")) || 1;
-	const x = Number(gsap.getProperty(coverScene, "x")) || 0;
-	const y = Number(gsap.getProperty(coverScene, "y")) || 0;
-	const rotateX = Number(gsap.getProperty(coverScene, "rotateX")) || 0;
-	const rotateY = Number(gsap.getProperty(coverScene, "rotateY")) || 0;
-	const rotation = Number(gsap.getProperty(coverScene, "rotation")) || 0;
-
-	gsap.set(".cover-content", {
-		x: -x / scale,
-		y: -y / scale,
-		scale: 1 / scale,
-		rotateX: -rotateX,
-		rotateY: -rotateY,
-		rotation: -rotation,
-		transformOrigin: "50% 50%"
-	});
 }
 
 function alignToElement(fromSelector, toSelector, axis) {
@@ -376,21 +349,29 @@ function initStoryTimeline() {
 			const { mobile } = context.conditions;
 			let coverWasActive = false;
 			const initialCoverScale = coverStartScale();
-			const initialMaskOffset = coverMaskStartOffset(mobile);
 
 			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
+			gsap.set(".cover-parallax-frame", { clearProps: "transform" });
 			gsap.set(".cover-scene", {
 				autoAlpha: 1,
-				x: initialMaskOffset.x,
-				y: initialMaskOffset.y,
+				x: 0,
+				y: 0,
 				scale: initialCoverScale,
-				rotateX: mobile ? 1.8 : 3.8,
-				rotateY: mobile ? -1.2 : -3.2,
-				rotation: mobile ? -0.8 : -1.6,
+				rotateX: 0,
+				rotateY: -15,
+				rotation: 0,
 				transformPerspective: 1200
 			});
-			syncCoverContentToMask();
+			gsap.set(".cover-content", {
+				x: 0,
+				y: 0,
+				scale: 1,
+				rotateX: 0,
+				rotateY: 0,
+				rotation: 0,
+				transformOrigin: "50% 50%"
+			});
 			gsap.set(".cover-world", {
 				scale: 1,
 				rotateX: 0,
@@ -432,7 +413,6 @@ function initStoryTimeline() {
 
 			const tl = gsap.timeline({
 				defaults: { ease: "none" },
-				onUpdate: syncCoverContentToMask,
 				scrollTrigger: {
 					id: "story",
 					trigger: storyScroll,
@@ -457,16 +437,16 @@ function initStoryTimeline() {
 			tl.to(
 				".cover-scene",
 				{
-					x: () => (mobile ? -8 : -16),
-					y: () => (mobile ? -8 : -18),
-					scale: () => initialCoverScale * (mobile ? 0.78 : 0.74),
-					rotateX: mobile ? 1.2 : 2.2,
-					rotateY: mobile ? -0.8 : -1.6,
-					rotation: mobile ? -0.45 : -0.8,
-					duration: 0.06,
+					x: 0,
+					y: 0,
+					scale: () => initialCoverScale * (mobile ? 0.72 : 0.68),
+					rotateX: 0,
+					rotateY: -12,
+					rotation: 0,
+					duration: 0.08,
 					ease: "power3.out"
 				},
-				0.075
+				0.03
 			);
 			tl.to(
 				".cover-scene",
@@ -477,22 +457,10 @@ function initStoryTimeline() {
 					rotateX: 0,
 					rotateY: 0,
 					rotation: 0,
-					duration: 0.185,
+					duration: 0.2,
 					ease: "power2.inOut"
 				},
-				0.125
-			);
-			tl.to(".cover-world", { scale: mobile ? 0.98 : 0.96, rotateX: 0, duration: 0.22, ease: "power1.inOut" }, 0.115);
-			tl.to(
-				".cover-avatar",
-				{
-					top: () => `${mobile ? 22 : coverFinalAvatarOffset}px`,
-					left: () => `${window.innerWidth / 2}px`,
-					width: () => `${window.innerHeight * coverAvatarAspect}px`,
-					duration: 0.22,
-					ease: "power1.inOut"
-				},
-				0.14
+				0.1
 			);
 			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
@@ -580,21 +548,29 @@ function initStoryTimeline() {
 function initReducedStory() {
 	setChromeTheme("cover");
 	const initialCoverScale = coverStartScale();
-	const initialMaskOffset = coverMaskStartOffset(window.matchMedia("(max-width: 900px)").matches);
 
 	gsap.set(".section", { autoAlpha: 0 });
 	gsap.set(".cover-section", { autoAlpha: 1 });
+	gsap.set(".cover-parallax-frame", { clearProps: "transform" });
 	gsap.set(".cover-scene", {
 		autoAlpha: 1,
-		x: initialMaskOffset.x,
-		y: initialMaskOffset.y,
+		x: 0,
+		y: 0,
 		scale: initialCoverScale,
-		rotateX: window.matchMedia("(max-width: 900px)").matches ? 1.8 : 3.8,
-		rotateY: window.matchMedia("(max-width: 900px)").matches ? -1.2 : -3.2,
-		rotation: window.matchMedia("(max-width: 900px)").matches ? -0.8 : -1.6,
+		rotateX: 0,
+		rotateY: -15,
+		rotation: 0,
 		transformPerspective: 1200
 	});
-	syncCoverContentToMask();
+	gsap.set(".cover-content", {
+		x: 0,
+		y: 0,
+		scale: 1,
+		rotateX: 0,
+		rotateY: 0,
+		rotation: 0,
+		transformOrigin: "50% 50%"
+	});
 	gsap.set(".cover-world", {
 		scale: 1,
 		rotateX: 0,
