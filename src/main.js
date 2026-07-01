@@ -289,7 +289,7 @@ function aboutHeadPortalRect() {
 }
 
 function fullPortalRect() {
-	const height = Math.max(window.innerHeight * 1.18, (window.innerWidth * 1.18) / portalMaskAspect);
+	const height = Math.max(window.innerHeight * 1.46, (window.innerWidth * 1.46) / portalMaskAspect);
 
 	return {
 		cx: window.innerWidth / 2,
@@ -330,7 +330,7 @@ function exitFlyPortalRect() {
 	};
 }
 
-function portalVars(rectGetter, { rotation = 0 } = {}) {
+function portalVars(rectGetter, { rotation = 0, rotateY = 0, worldY = 0 } = {}) {
 	const readRect = () => rectGetter();
 
 	return {
@@ -347,7 +347,10 @@ function portalVars(rectGetter, { rotation = 0 } = {}) {
 		"--portal-origin-x": () => `${readRect().cx}px`,
 		"--portal-origin-y": () => `${readRect().cy}px`,
 		"--portal-rotation": () => `${rotation}deg`,
-		"--portal-world-rotation": () => `${-rotation}deg`
+		"--portal-rotate-y": () => `${rotateY}deg`,
+		"--portal-world-rotation": () => `${-rotation}deg`,
+		"--portal-world-rotate-y": () => `${-rotateY}deg`,
+		"--portal-world-y": () => `${worldY}px`
 	};
 }
 
@@ -434,34 +437,24 @@ function initStoryTimeline() {
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
 			gsap.set(".about-copy, .about-feier", { autoAlpha: 0, y: 28 });
-			gsap.set(".about-head", { autoAlpha: 0, "--about-head-y": "28px" });
-			gsap.set(".commission-bg", { autoAlpha: 0 });
-			gsap.set(".commission-copy", { autoAlpha: 0, y: 36 });
-			gsap.set(".commission-head", { autoAlpha: 0 });
-			gsap.set(".commission-portal", { autoAlpha: 0, ...portalVars(aboutHeadPortalRect) });
-			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 28 });
-			gsap.set(".gallery-card", { autoAlpha: 0, y: -54 });
-			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: -70, rotateY: 0, scale: 1 });
-			gsap.set(".commission-flip", {
+			gsap.set(".about-head", {
 				autoAlpha: 0,
+				"--about-head-y": "28px",
 				x: 0,
 				y: 0,
-				scaleX: 1,
-				scaleY: 1,
-				rotateX: 0,
+				scale: 1,
 				rotateY: 0,
-				clipPath: "inset(0px round 32px)",
-				transformPerspective: mobile ? 1000 : 1200,
+				transformPerspective: mobile ? 900 : 1200,
 				transformOrigin: "50% 50%"
 			});
-			gsap.set(".flip-card", {
-				rotateY: 0,
-				rotateX: 0,
-				transformPerspective: mobile ? 1000 : 1200,
-				transformOrigin: "50% 50%"
-			});
-			gsap.set(".flip-front, .flip-back", { autoAlpha: 1 });
-
+			gsap.set(".commission-bg", { autoAlpha: 0 });
+			gsap.set(".commission-copy", { autoAlpha: 0, y: 0 });
+			gsap.set(".commission-head:not(.commission-portal-head)", { autoAlpha: 0, y: 0 });
+			gsap.set(".commission-portal", { autoAlpha: 0, ...portalVars(pinchedFullPortalRect) });
+			gsap.set(".gallery-section", { autoAlpha: 0, y: "100vh" });
+			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 48 });
+			gsap.set(".gallery-card", { autoAlpha: 0, y: 84 });
+			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 104, rotateY: 0, scale: 1 });
 			const tl = gsap.timeline({
 				defaults: { ease: "none" },
 				scrollTrigger: {
@@ -565,76 +558,64 @@ function initStoryTimeline() {
 			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
 			tl.to(".about-head", { autoAlpha: 1, "--about-head-y": "0px", duration: 0.12 }, 0.24);
 
-			tl.to(".commission-section", { autoAlpha: 1, duration: 0.08 }, 0.42);
-			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.45);
+			tl.set(".commission-section", { autoAlpha: 1 }, 0.505);
 			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.42);
-			tl.set(".commission-flip", { autoAlpha: 1 }, 0.43);
-			tl.set(".flip-front", { autoAlpha: 1 }, 0.43);
-			tl.set(".flip-back", { autoAlpha: 1 }, 0.54);
-			tl.fromTo(
-				".commission-flip",
+			tl.set(".about-head", { zIndex: 8, transition: "none" }, 0.43);
+			tl.to(".about-title, .about-copy, .about-feier, .about-portrait", { autoAlpha: 0, y: -20, duration: 0.11 }, 0.43);
+			tl.to(
+				".about-head",
 				{
-					x: alignToElement(".commission-flip", ".about-head", "x"),
-					y: alignToElement(".commission-flip", ".about-head", "y"),
-					scaleX: alignToElement(".commission-flip", ".about-head", "scaleX"),
-					scaleY: alignToElement(".commission-flip", ".about-head", "scaleY"),
-					rotateX: 0,
-					rotateY: 0
-				},
-				{
-					x: alignToViewportCenter(".commission-flip", "x"),
-					y: alignToViewportCenter(".commission-flip", "y"),
-					scaleX: scaleToCoverViewport(".commission-flip", mobile ? 1.18 : 1.12),
-					scaleY: scaleToCoverViewport(".commission-flip", mobile ? 1.18 : 1.12),
-					rotateX: 0,
-					rotateY: 180,
-					duration: 0.22
+					x: alignToViewportCenter(".about-head", "x"),
+					y: alignToViewportCenter(".about-head", "y"),
+					scale: scaleToCoverViewport(".about-head", mobile ? 1.28 : 1.16),
+					rotateY: 90,
+					duration: 0.14,
+					ease: "power2.in"
 				},
 				0.43
 			);
-			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), autoAlpha: 1 }, 0.54);
+			tl.set(".about-head", { autoAlpha: 0 }, 0.555);
+			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), autoAlpha: 1 }, 0.555);
 			tl.to(
 				".commission-portal",
 				{
 					...portalVars(fullPortalRect),
 					autoAlpha: 1,
-					duration: 0.16
+					duration: 0.16,
+					ease: "power2.out"
 				},
-				0.54
+				0.555
 			);
-			tl.set(".flip-front", { autoAlpha: 0 }, 0.54);
-			tl.set(".commission-flip", { autoAlpha: 0 }, 0.65);
-			tl.to(".commission-bg", { autoAlpha: 1, duration: 0.08 }, 0.62);
-			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.62);
-			tl.to(".commission-head", { autoAlpha: 1, duration: 0.1 }, 0.62);
-			tl.set(".commission-portal", { autoAlpha: 0 }, 0.705);
+			tl.set(".commission-bg, .commission-copy, .commission-head:not(.commission-portal-head)", { autoAlpha: 1, y: 0 }, 0.705);
+			tl.set(".about-section", { autoAlpha: 0 }, 0.705);
+			tl.set(".commission-portal", { autoAlpha: 0 }, 0.72);
 
 			tl.set(".commission-portal", { ...portalVars(fullPortalRect), autoAlpha: 1 }, 0.735);
-			tl.to(".gallery-section", { autoAlpha: 1, duration: 0.08 }, 0.74);
-			tl.to(".commission-bg", { autoAlpha: 0, duration: 0.08 }, 0.755);
-			tl.to(".commission-copy", { autoAlpha: 0, y: -16, duration: 0.08 }, 0.755);
-			tl.to(".commission-head", { autoAlpha: 0, duration: 0.08 }, 0.755);
+			tl.set(".commission-bg, .commission-copy, .commission-head:not(.commission-portal-head)", { autoAlpha: 0 }, 0.735);
+			tl.to(".gallery-section", { autoAlpha: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.74);
 			tl.to(
 				".commission-portal",
 				{
-					...portalVars(exitCoverPortalRect, { rotation: mobile ? -3 : -5 }),
-					duration: 0.14
+					...portalVars(exitCoverPortalRect, { rotation: mobile ? -3 : -5, worldY: mobile ? -64 : -96 }),
+					duration: 0.17,
+					ease: "power2.inOut"
 				},
-				0.755
+				0.735
 			);
-			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.02, duration: 0.1 }, 0.81);
-			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.12 }, 0.84);
+			tl.to(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.1 }, 0.79);
+			tl.to(".gallery-card:not(.is-transition)", { autoAlpha: 1, y: 0, stagger: 0.006, duration: 0.1 }, 0.82);
 			tl.to(
 				".commission-portal",
 				{
-					...portalVars(exitFlyPortalRect, { rotation: mobile ? -6 : -9 }),
+					...portalVars(exitFlyPortalRect, { rotation: mobile ? -6 : -9, worldY: mobile ? -104 : -152 }),
 					autoAlpha: 0,
-					duration: 0.15
+					duration: 0.14,
+					ease: "power2.in"
 				},
-				0.86
+				0.84
 			);
-			tl.to(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, duration: 0.1 }, 0.9);
-			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.94);
+			tl.to(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, duration: 0.1 }, 0.88);
+			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.92);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
 			playInkSweep();
