@@ -403,6 +403,7 @@ button {
 	--about-rule-left: clamp(48px, 4.2vw, 64px);
 	--about-rule-right: min(61.8vw, calc(100vw - clamp(423px, 54.3vh, 533px) - var(--frame-inset) - 48px));
 	--about-head-size: clamp(216px, 16.9vw, 255px);
+	--about-head-gap: clamp(30px, 2.4vw, 36px);
 	transform-origin: 50% 50%;
 	will-change: clip-path, transform;
 }
@@ -520,20 +521,20 @@ button {
 .about-head {
 	position: absolute;
 	top: clamp(560px, 67.1vh, 659px);
-	left: calc(var(--about-rule-right) - var(--about-head-size));
+	left: calc(var(--about-rule-right) - var(--about-head-size) - var(--about-head-gap));
 	z-index: 3;
-	--head-mask-size: 100%;
+	--about-head-scale: 1;
+	--about-head-y: 0px;
 	width: var(--about-head-size);
 	aspect-ratio: 255 / 255;
 	background:
 		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
 		url("/img/commission-bg.webp") center / 140% auto;
-	mask-size: var(--head-mask-size) var(--head-mask-size);
-	-webkit-mask-size: var(--head-mask-size) var(--head-mask-size);
+	transform: translate3d(0, var(--about-head-y), 0) scale(var(--about-head-scale));
+	transform-origin: center;
 	transition:
-		--head-mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
-		mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
-		-webkit-mask-size 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+		transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+		filter 0.55s ease;
 	will-change: transform, opacity;
 }
 
@@ -545,13 +546,14 @@ button {
 	background:
 		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
 		url("/img/commission-bg.webp") center / cover;
-	transform: scale(1.18);
+	transform: scale(1.04);
 	transform-origin: center;
 	transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .about-head:hover {
-	--head-mask-size: 108%;
+	--about-head-scale: 1.12;
+	filter: saturate(1.04);
 }
 
 .about-head img,
@@ -568,11 +570,11 @@ button {
 }
 
 .about-head:hover::before {
-	transform: scale(1.26);
+	transform: scale(0.965);
 }
 
 .about-head:hover img {
-	transform: scale(1.08);
+	transform: scale(0.975);
 }
 
 .about-portrait {

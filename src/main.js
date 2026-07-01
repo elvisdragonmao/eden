@@ -401,7 +401,8 @@ function initStoryTimeline() {
 			gsap.set(".cover-avatar", readCoverAvatarLayout());
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
-			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
+			gsap.set(".about-copy, .about-feier", { autoAlpha: 0, y: 28 });
+			gsap.set(".about-head", { autoAlpha: 0, "--about-head-y": "28px" });
 			gsap.set(".commission-bg", { autoAlpha: 0 });
 			gsap.set(".commission-copy", { autoAlpha: 0, y: 36 });
 			gsap.set(".commission-head", { autoAlpha: 0 });
@@ -497,7 +498,7 @@ function initStoryTimeline() {
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
 			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, 0.24);
 			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
-			tl.to(".about-head", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.24);
+			tl.to(".about-head", { autoAlpha: 1, "--about-head-y": "0px", duration: 0.12 }, 0.24);
 
 			tl.to(".commission-section", { autoAlpha: 1, duration: 0.08 }, 0.42);
 			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.45);
