@@ -132,7 +132,13 @@ function baseRect(element) {
 
 function coverStartScale() {
 	const baseWidth = window.innerHeight * coverMaskAspect;
-	return Math.max(window.innerWidth / baseWidth, 1) * 1.18;
+	const mobile = window.matchMedia("(max-width: 900px)").matches;
+	const maxPointerX = mobile ? 18 : 34;
+	const maxPointerY = mobile ? 16 : 28;
+	const visibleWidthRatio = mobile ? 0.58 : 0.52;
+	const visibleHeightRatio = mobile ? 0.82 : 0.76;
+
+	return Math.max((window.innerWidth + maxPointerX * 2) / (baseWidth * visibleWidthRatio), (window.innerHeight + maxPointerY * 2) / (window.innerHeight * visibleHeightRatio), 1);
 }
 
 function syncCoverBackgroundScale() {
@@ -366,7 +372,7 @@ function initStoryTimeline() {
 			gsap.set(".cover-content", {
 				x: 0,
 				y: 0,
-				scale: 1,
+				scale: 1 / initialCoverScale,
 				rotateX: 0,
 				rotateY: 0,
 				rotation: 0,
@@ -565,7 +571,7 @@ function initReducedStory() {
 	gsap.set(".cover-content", {
 		x: 0,
 		y: 0,
-		scale: 1,
+		scale: 1 / initialCoverScale,
 		rotateX: 0,
 		rotateY: 0,
 		rotation: 0,
