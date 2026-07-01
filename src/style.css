@@ -399,6 +399,9 @@ button {
 .about-shell {
 	position: absolute;
 	inset: 0;
+	--about-rule-left: clamp(48px, 4.2vw, 64px);
+	--about-rule-right: min(61.8vw, calc(100vw - clamp(423px, 54.3vh, 533px) - var(--frame-inset) - 48px));
+	--about-head-size: clamp(216px, 16.9vw, 255px);
 	transform-origin: 50% 50%;
 	will-change: clip-path, transform;
 }
@@ -432,10 +435,14 @@ button {
 	font-size: 0.62em;
 }
 
+.about-title-small {
+	font-size: 0.618em;
+}
+
 .about-rule {
 	position: absolute;
-	left: clamp(48px, 4.2vw, 64px);
-	width: calc(61.8vw - clamp(48px, 4.2vw, 64px));
+	left: var(--about-rule-left);
+	width: calc(var(--about-rule-right) - var(--about-rule-left));
 	pointer-events: none;
 	border-color: var(--line-dark);
 	border-style: solid;
@@ -509,12 +516,14 @@ button {
 .about-head {
 	position: absolute;
 	top: clamp(560px, 67.1vh, 659px);
-	left: clamp(440px, 37.8vw, 572px);
+	left: calc(var(--about-rule-right) - var(--about-head-size));
 	z-index: 3;
 	--head-mask-size: 100%;
-	width: clamp(216px, 16.9vw, 255px);
+	width: var(--about-head-size);
 	aspect-ratio: 255 / 255;
-	background: #fff;
+	background:
+		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+		url("/img/commission-bg.webp") center / 140% auto;
 	mask-size: var(--head-mask-size) var(--head-mask-size);
 	-webkit-mask-size: var(--head-mask-size) var(--head-mask-size);
 	transition:
@@ -526,13 +535,13 @@ button {
 
 .about-head::before {
 	position: absolute;
-	inset: -18%;
+	inset: -34%;
 	z-index: 0;
 	content: "";
 	background:
 		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
 		url("/img/commission-bg.webp") center / cover;
-	transform: scale(1.08);
+	transform: scale(1.18);
 	transform-origin: center;
 	transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -555,11 +564,11 @@ button {
 }
 
 .about-head:hover::before {
-	transform: scale(1.16);
+	transform: scale(1.26);
 }
 
 .about-head:hover img {
-	transform: scale(1.04);
+	transform: scale(1.08);
 }
 
 .about-portrait {
