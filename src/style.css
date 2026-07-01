@@ -238,7 +238,7 @@ button {
 	height: 100svh;
 	overflow: visible;
 	--cover-scene-width: calc(100svh * 533 / 806);
-	background: #a7b6bb url("/img/cover-bg.webp") center / cover;
+	background: #a7b6bb;
 	mask-image: url("/img/mask/mask-portrait.svg");
 	mask-mode: alpha;
 	mask-position: center;
@@ -283,7 +283,7 @@ button {
 }
 
 .cover-bg {
-	inset: -32vh -32vw;
+	inset: -48vh -48vw;
 	background-image: url("/img/cover-bg.webp");
 	transform: translate3d(calc(var(--cover-mx) * -72px), calc(var(--cover-my) * -56px), -32px) rotateX(calc(var(--cover-my) * -3.2deg)) rotateY(calc(var(--cover-mx) * 4.8deg))
 		scale(var(--cover-bg-scale));
