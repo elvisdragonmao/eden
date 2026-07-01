@@ -146,7 +146,12 @@ function syncCoverBackgroundScale() {
 	const maxShiftX = mobile ? 30 : 72;
 	const maxShiftY = mobile ? 24 : 56;
 	const scale = Math.max((window.innerWidth + maxShiftX * 2) / window.innerWidth, (window.innerHeight + maxShiftY * 2) / window.innerHeight) * 1.04;
+	const commissionMaxShiftX = mobile ? 0 : 10;
+	const commissionMaxShiftY = mobile ? 0 : 8;
+	const commissionScale = Math.max((window.innerWidth + commissionMaxShiftX * 2) / window.innerWidth, (window.innerHeight + commissionMaxShiftY * 2) / window.innerHeight);
+
 	document.documentElement.style.setProperty("--cover-bg-scale", scale.toFixed(4));
+	document.documentElement.style.setProperty("--commission-bg-scale", commissionScale.toFixed(4));
 }
 
 function resetCoverAvatarLayout() {
@@ -399,10 +404,11 @@ function initStoryTimeline() {
 			gsap.set(".about-copy, .about-feier, .about-head", { autoAlpha: 0, y: 28 });
 			gsap.set(".commission-bg", { autoAlpha: 0 });
 			gsap.set(".commission-copy", { autoAlpha: 0, y: 36 });
+			gsap.set(".commission-head", { autoAlpha: 0 });
 			gsap.set(".commission-portal", { autoAlpha: 0, ...portalVars(aboutHeadPortalRect) });
 			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 0, y: 28 });
-			gsap.set(".gallery-card", { autoAlpha: 0, y: 44 });
-			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: 0, rotateY: 0, scale: 1 });
+			gsap.set(".gallery-card", { autoAlpha: 0, y: -54 });
+			gsap.set(".gallery-card.is-transition", { autoAlpha: 0, y: -70, rotateY: 0, scale: 1 });
 			gsap.set(".commission-flip", {
 				autoAlpha: 0,
 				x: 0,
@@ -421,6 +427,7 @@ function initStoryTimeline() {
 				transformPerspective: mobile ? 1000 : 1200,
 				transformOrigin: "50% 50%"
 			});
+			gsap.set(".flip-front, .flip-back", { autoAlpha: 1 });
 
 			const tl = gsap.timeline({
 				defaults: { ease: "none" },
@@ -496,6 +503,8 @@ function initStoryTimeline() {
 			tl.to(".about-section", { autoAlpha: 0, duration: 0.12 }, 0.45);
 			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.42);
 			tl.set(".commission-flip", { autoAlpha: 1 }, 0.43);
+			tl.set(".flip-front", { autoAlpha: 1 }, 0.43);
+			tl.set(".flip-back", { autoAlpha: 1 }, 0.54);
 			tl.fromTo(
 				".commission-flip",
 				{
@@ -527,15 +536,18 @@ function initStoryTimeline() {
 				},
 				0.54
 			);
-			tl.to(".commission-flip", { autoAlpha: 0, duration: 0.05 }, 0.57);
+			tl.set(".flip-front", { autoAlpha: 0 }, 0.54);
+			tl.set(".commission-flip", { autoAlpha: 0 }, 0.65);
 			tl.to(".commission-bg", { autoAlpha: 1, duration: 0.08 }, 0.62);
 			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.62);
-			tl.to(".commission-portal", { autoAlpha: 0, duration: 0.025 }, 0.705);
+			tl.to(".commission-head", { autoAlpha: 1, duration: 0.1 }, 0.62);
+			tl.set(".commission-portal", { autoAlpha: 0 }, 0.705);
 
 			tl.set(".commission-portal", { ...portalVars(fullPortalRect), autoAlpha: 1 }, 0.735);
 			tl.to(".gallery-section", { autoAlpha: 1, duration: 0.08 }, 0.74);
 			tl.to(".commission-bg", { autoAlpha: 0, duration: 0.08 }, 0.755);
 			tl.to(".commission-copy", { autoAlpha: 0, y: -16, duration: 0.08 }, 0.755);
+			tl.to(".commission-head", { autoAlpha: 0, duration: 0.08 }, 0.755);
 			tl.to(
 				".commission-portal",
 				{
@@ -555,7 +567,7 @@ function initStoryTimeline() {
 				},
 				0.86
 			);
-			tl.to(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, duration: 0.06 }, 0.9);
+			tl.to(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, duration: 0.1 }, 0.9);
 			tl.to(".commission-section", { autoAlpha: 0, duration: 0.08 }, 0.94);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);

@@ -25,6 +25,7 @@
 	--cover-mx: 0;
 	--cover-my: 0;
 	--cover-bg-scale: 1.2;
+	--commission-bg-scale: 1.02;
 	font-family: FancyFreeFont1, system-ui, sans-serif;
 	color: var(--ink);
 	background: var(--paper);
@@ -601,7 +602,7 @@ button {
 .commission-bg,
 .commission-portal-bg {
 	background-image: url("/img/commission-bg.webp");
-	transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0) scale(1.04);
+	transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0) scale(var(--commission-bg-scale));
 }
 
 .commission-bg {
@@ -636,10 +637,26 @@ button {
 	line-height: 1.2;
 }
 
+.commission-head {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 3;
+	width: clamp(326px, 31vw, 468px);
+	margin: 0;
+	transform: translate3d(calc(-50% + var(--mx) * 18px), calc(-50% + var(--my) * 14px), 0);
+	will-change: transform, opacity;
+}
+
+.commission-head img {
+	width: 100%;
+	height: auto;
+}
+
 .commission-portal {
 	position: absolute;
 	inset: 0;
-	z-index: 5;
+	z-index: 7;
 	overflow: hidden;
 	opacity: 0;
 	pointer-events: none;
@@ -675,6 +692,10 @@ button {
 
 .commission-portal-copy {
 	z-index: 2;
+}
+
+.commission-portal-head {
+	z-index: 3;
 }
 
 .commission-flip {
@@ -717,6 +738,13 @@ button {
 	background:
 		linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
 		url("/img/commission-bg.webp") center / cover;
+}
+
+.flip-back {
+	background:
+		radial-gradient(ellipse at center, rgba(0, 49, 99, 0.92) 0 54%, rgba(0, 49, 99, 0.28) 60%, transparent 72%),
+		url("/img/commission-bg.webp") center / cover;
+	transform: rotateY(180deg);
 }
 
 .gallery-section {
@@ -1159,7 +1187,7 @@ button {
 	.commission-bg,
 	.commission-portal-bg {
 		background-position: center;
-		transform: scale(1.04);
+		transform: scale(var(--commission-bg-scale));
 	}
 
 	.commission-copy,
@@ -1179,6 +1207,12 @@ button {
 	.commission-copy p,
 	.commission-portal-copy p {
 		font-size: 17px;
+	}
+
+	.commission-head {
+		top: 56%;
+		width: min(96vw, 410px);
+		transform: translate3d(calc(-50% + var(--mx) * 10px), calc(-50% + var(--my) * 8px), 0);
 	}
 
 	.commission-flip {
