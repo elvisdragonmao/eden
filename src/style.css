@@ -506,6 +506,7 @@ button {
 
 .about-copy-two {
 	top: clamp(456px, 56.1vh, 551px);
+	width: clamp(300px, 24vw, 384px);
 }
 
 .masked-square,
@@ -1237,7 +1238,8 @@ button {
 
 	.about-copy-two {
 		top: 432px;
-		width: min(42.5vw, 170px);
+		right: 23px;
+		width: auto;
 	}
 
 	.about-head {
