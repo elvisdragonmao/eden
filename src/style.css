@@ -413,7 +413,6 @@ button {
 	--about-head-size: clamp(216px, 16.9vw, 255px);
 	--about-head-gap: clamp(30px, 2.4vw, 36px);
 	transform-origin: 50% 50%;
-	will-change: clip-path, transform;
 }
 
 .about-title {
@@ -422,7 +421,6 @@ button {
 	left: clamp(80px, 7.8vw, 117px);
 	z-index: 3;
 	color: #000;
-	will-change: transform, opacity;
 }
 
 .about-title p {
@@ -449,7 +447,8 @@ button {
 	display: inline-block;
 	font-size: 0.618em;
 	margin-inline: -0.08em;
-	transform: translateY(-0.04em);
+	position: relative;
+	top: -0.04em;
 }
 
 .about-rule {
@@ -489,7 +488,6 @@ button {
 	color: #000;
 	font-size: clamp(21px, 1.6vw, 24px);
 	line-height: 1.2;
-	will-change: transform, opacity;
 }
 
 .about-copy p {
@@ -615,7 +613,7 @@ button {
 .commission-bg,
 .commission-portal-bg {
 	background-image: url("/img/commission-bg.webp");
-	transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0) scale(var(--commission-bg-scale));
+	transform: translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0) scale(var(--commission-bg-scale));
 }
 
 .commission-bg {
@@ -630,7 +628,6 @@ button {
 	z-index: 3;
 	max-width: min(455px, 40vw);
 	color: var(--violet-ink);
-	will-change: transform, opacity;
 }
 
 .commission-copy h2,
@@ -657,7 +654,7 @@ button {
 	z-index: 3;
 	width: clamp(430px, 40vw, 640px);
 	margin: 0;
-	transform: translate3d(calc(-50% + var(--mx) * 18px), calc(-50% + var(--my) * 14px), 0);
+	transform: translate(-50%, -50%) translate3d(calc(var(--mx) * 32px), calc(var(--my) * 24px), 0);
 	will-change: transform, opacity;
 }
 
@@ -693,7 +690,7 @@ button {
 	overflow: hidden;
 	transform: translate3d(0, var(--portal-world-y, 0px), 0) rotate(var(--portal-world-rotation, 0deg));
 	transform-origin: var(--portal-origin-x, 50vw) var(--portal-origin-y, 50svh);
-	will-change: transform;
+	will-change: opacity, transform;
 }
 
 .commission-portal-bg {
@@ -732,14 +729,15 @@ button {
 .gallery-section h2 {
 	position: absolute;
 	top: clamp(88px, 12.1vh, 119px);
-	left: 50%;
+	left: 0;
+	right: 0;
 	margin: 0;
 	font-size: clamp(80px, 7.95vw, 120px);
 	font-weight: 400;
 	line-height: 1.2;
 	letter-spacing: 0;
+	text-align: center;
 	white-space: nowrap;
-	transform: translateX(-50%);
 }
 
 .gallery-intro {
@@ -800,6 +798,9 @@ button {
 
 .gallery-card.is-transition {
 	opacity: 0;
+	background:
+		url("/img/commission-bg.webp") center / cover,
+		#d9d9d9;
 	transform-origin: 50% 50%;
 }
 
@@ -1081,11 +1082,11 @@ button {
 	}
 
 	.scroll-cue {
-		right: auto;
+		right: 0;
 		bottom: 32px;
-		left: 50%;
+		left: 0;
+		justify-content: center;
 		color: var(--blue-ink);
-		transform: translateX(-50%);
 	}
 
 	.about-section {
@@ -1180,7 +1181,7 @@ button {
 	.commission-head {
 		top: 56%;
 		width: min(128vw, 540px);
-		transform: translate3d(calc(-50% + var(--mx) * 10px), calc(-50% + var(--my) * 8px), 0);
+		transform: translate(-50%, -50%) translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0);
 	}
 
 	.gallery-section {
@@ -1255,12 +1256,12 @@ button {
 	}
 
 	.site-credit {
-		right: auto;
+		right: 0;
 		bottom: 25px;
-		left: 50%;
-		width: max-content;
+		left: 0;
+		width: auto;
 		font-size: 16px;
-		transform: translateX(-50%);
+		text-align: center;
 	}
 
 	.lightbox {

@@ -5,6 +5,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>伊甸</title>
 		<meta name="description" content="伊甸的一頁式個人網站，收錄介紹、委託資訊與圖集。" />
+		<script>
+			if ("scrollRestoration" in history) {
+				history.scrollRestoration = "manual";
+			}
+		</script>
 		<link rel="stylesheet" href="/src/style.css" />
 	</head>
 	<body>
@@ -67,19 +72,19 @@
 								<div class="cover-content">
 									<div class="cover-world">
 										<div class="cover-bg" aria-hidden="true"></div>
-										<h1 class="cover-title">伊甸</h1>
 										<div class="cover-avatar" aria-hidden="true">
 											<img class="cover-avatar-base" src="/img/cover-avatar.webp" alt="" decoding="async" />
 											<img class="cover-avatar-color" src="/img/cover-avatar.webp" alt="" decoding="async" />
 										</div>
-										<a class="scroll-cue" href="#about" aria-label="往下捲動到關於區塊">
-											<span class="scroll-arrow" aria-hidden="true"></span>
-											<span>Scroll</span>
-										</a>
 									</div>
 								</div>
 							</div>
 						</div>
+						<h1 class="cover-title">伊甸</h1>
+						<a class="scroll-cue" href="#about" aria-label="往下捲動到關於區塊">
+							<span class="scroll-arrow" aria-hidden="true"></span>
+							<span>Scroll</span>
+						</a>
 					</section>
 
 					<section class="section about-section" aria-label="關於伊甸" data-scene="about">
@@ -168,7 +173,14 @@
 								<button class="gallery-card" type="button" data-full="/img/me/slow.png" data-caption="伸手打招呼的伊甸" data-author="Saki / 久心" data-author-url="https://slow.work">
 									<img src="/img/me/slow.png" alt="伸手打招呼的伊甸" />
 								</button>
-								<button class="gallery-card is-narrow" type="button" data-full="/img/feier.webp" data-caption="菲爾" data-author="菲爾" data-author-url="https://www.facebook.com/yin.chuan.fei.er/photos">
+								<button
+									class="gallery-card is-narrow"
+									type="button"
+									data-full="/img/feier.webp"
+									data-caption="菲爾"
+									data-author="菲爾"
+									data-author-url="https://www.facebook.com/yin.chuan.fei.er/photos"
+								>
 									<img src="/img/feier.webp" alt="菲爾角色插圖" />
 								</button>
 								<button class="gallery-card" type="button" data-full="/img/me/nullma.webp" data-caption="Nullma" data-author="nullma" data-author-url="https://x.com/chocomint_null">

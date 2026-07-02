@@ -25,8 +25,22 @@ const portalMaskAspect = 533 / 806;
 const portalTurnClip = "polygon(48.6% 4%, 52.4% 0%, 53.2% 100%, 49.1% 96%)";
 const portalMidTurnClip = "polygon(17% -8%, 82% -12%, 87% 112%, 21% 106%)";
 const portalFlatClip = "polygon(-12% -12%, 112% -12%, 112% 112%, -12% 112%)";
+const storyScrub = 0.24;
+const readableTextSelector = ".cover-title, .scroll-cue, .about-title, .about-copy, .commission-copy, .gallery-section h2, .gallery-intro";
+
+if ("scrollRestoration" in window.history) {
+	window.history.scrollRestoration = "manual";
+}
+
+if (!window.location.hash) {
+	window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+function clearReadableTextTransforms(selector = readableTextSelector) {
+	gsap.set(selector, { clearProps: "transform,willChange" });
+}
 
 function setChromeTheme(theme) {
 	if (!chrome) return;
@@ -149,8 +163,8 @@ function syncCoverBackgroundScale() {
 	const maxShiftX = mobile ? 30 : 72;
 	const maxShiftY = mobile ? 24 : 56;
 	const scale = Math.max((window.innerWidth + maxShiftX * 2) / window.innerWidth, (window.innerHeight + maxShiftY * 2) / window.innerHeight) * 1.04;
-	const commissionMaxShiftX = mobile ? 0 : 10;
-	const commissionMaxShiftY = mobile ? 0 : 8;
+	const commissionMaxShiftX = mobile ? 0 : 18;
+	const commissionMaxShiftY = mobile ? 0 : 14;
 	const commissionScale = Math.max((window.innerWidth + commissionMaxShiftX * 2) / window.innerWidth, (window.innerHeight + commissionMaxShiftY * 2) / window.innerHeight);
 
 	document.documentElement.style.setProperty("--cover-bg-scale", scale.toFixed(4));
@@ -222,6 +236,29 @@ function coverPortraitLayerLayout() {
 
 function coverPortraitLayerValue(property) {
 	return () => `${coverPortraitLayerLayout()[property] || 0}px`;
+}
+
+function coverTitleFollowTransform(axis) {
+	return () => {
+		const title = baseRect(document.querySelector(".cover-title"));
+		const metrics = coverContentTargetMetrics();
+		if (!title || !metrics) {
+			if (axis === "scale") return 1;
+			return 0;
+		}
+
+		const { scale, contentLeft, contentTop } = metrics;
+		const sourceCenterX = title.left + title.width / 2;
+		const sourceCenterY = title.top + title.height / 2;
+		const targetCenterX = contentLeft + sourceCenterX * scale;
+		const targetCenterY = contentTop + sourceCenterY * scale;
+
+		if (axis === "x") return targetCenterX - sourceCenterX;
+		if (axis === "y") return targetCenterY - sourceCenterY;
+		if (axis === "scale") return scale;
+
+		return 0;
+	};
 }
 
 function alignToElement(fromSelector, toSelector, axis) {
@@ -323,13 +360,78 @@ function exitCoverPortalRect() {
 	};
 }
 
-function exitFlyPortalRect() {
-	const rect = exitCoverPortalRect();
+function galleryTransitionSquareRect() {
+	const card = document.querySelector(".gallery-card.is-transition");
+	const section = document.querySelector(".gallery-section");
+	const track = document.querySelector(".gallery-track");
+	if (!card) return { left: window.innerWidth * 0.55, top: window.innerHeight * 0.52, width: 296, height: 296 };
+
+	const previousSectionTransform = section?.style.transform;
+	const previousTrackTransform = track?.style.transform;
+	const previousCardTransform = card.style.transform;
+
+	if (section) section.style.transform = "";
+	if (track) track.style.transform = "";
+	card.style.transform = "";
+
+	const rect = card.getBoundingClientRect();
+
+	if (section) section.style.transform = previousSectionTransform || "";
+	if (track) track.style.transform = previousTrackTransform || "";
+	card.style.transform = previousCardTransform;
+
+	const size = Math.min(rect.width, rect.height);
+	return {
+		left: rect.left + (rect.width - size) / 2,
+		top: rect.top + (rect.height - size) / 2,
+		width: size,
+		height: size
+	};
+}
+
+function galleryTransitionRadius() {
+	const card = document.querySelector(".gallery-card.is-transition");
+	if (!card) return 29;
+
+	return parseFloat(getComputedStyle(card).borderTopLeftRadius) || 29;
+}
+
+function commissionExitSourceRect() {
+	const head = baseRect(document.querySelector(".commission-head:not(.commission-portal-head)"));
+	const fallbackSize = Math.min(window.innerWidth, window.innerHeight) * 0.74;
+	const size = head ? Math.min(head.width * 1.03, Math.min(window.innerWidth, window.innerHeight) * 0.86) : fallbackSize;
+	const cx = head ? head.left + head.width / 2 : window.innerWidth / 2;
+	const cy = head ? head.top + head.height / 2 : window.innerHeight / 2;
 
 	return {
-		...rect,
-		cx: window.innerWidth * 0.58,
-		cy: -rect.height * 0.16
+		left: clamp(cx - size / 2, 0, window.innerWidth - size),
+		top: clamp(cy - size / 2, 0, window.innerHeight - size),
+		width: size,
+		height: size
+	};
+}
+
+function commissionExitClipPath() {
+	const from = commissionExitSourceRect();
+	const to = galleryTransitionSquareRect();
+	const right = window.innerWidth - from.left - from.width;
+	const bottom = window.innerHeight - from.top - from.height;
+	const radius = galleryTransitionRadius() / (to.width / from.width);
+
+	return `inset(${from.top}px ${right}px ${bottom}px ${from.left}px round ${radius}px)`;
+}
+
+function commissionExitTransform(axis) {
+	return () => {
+		const from = commissionExitSourceRect();
+		const to = galleryTransitionSquareRect();
+		const scale = to.width / from.width;
+
+		if (axis === "scale") return scale;
+		if (axis === "x") return to.left - from.left * scale;
+		if (axis === "y") return to.top - from.top * scale;
+
+		return 0;
 	};
 }
 
@@ -403,9 +505,20 @@ function initStoryTimeline() {
 			const { mobile } = context.conditions;
 			let coverWasActive = false;
 			const initialCoverScale = coverStartScale();
+			const aboutIn = mobile ? 0.12 : 0.1;
+			const aboutTitleIn = mobile ? 0.25 : 0.12;
+			const aboutCopyIn = mobile ? 0.29 : 0.17;
+			const aboutSoftIn = mobile ? 0.3 : 0.19;
+			const aboutHeadIn = mobile ? 0.29 : 0.19;
+			const aboutTextClearAt = mobile ? 0.412 : 0.36;
+			const commissionTurnStart = 0.43;
+			const commissionFrontEdgeAt = 0.47725;
+			const commissionBackSettledAt = 0.5275;
+			const commissionRevealSettledAt = 0.56;
 
 			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
+			gsap.set(".cover-title, .scroll-cue", { autoAlpha: 1, clearProps: "transform,willChange", transformOrigin: "50% 50%" });
 			gsap.set(".cover-parallax-frame", { clearProps: "transform" });
 			gsap.set(".cover-bg", { clearProps: "top,left,right,bottom,width,height" });
 			gsap.set(".cover-scene", {
@@ -436,8 +549,10 @@ function initStoryTimeline() {
 			});
 			gsap.set(".cover-avatar", readCoverAvatarLayout());
 			gsap.set(".about-section, .commission-section, .gallery-section", { autoAlpha: 0 });
+			gsap.set(".commission-section", { clearProps: "transform", transformOrigin: "0 0", clipPath: "inset(0px 0px 0px 0px round 0px)" });
 			gsap.set(".about-title", mobile ? { autoAlpha: 0, x: 72, y: 0 } : { autoAlpha: 0, x: 0, y: -72 });
-			gsap.set(".about-copy, .about-feier", { autoAlpha: 0, y: 28 });
+			gsap.set(".about-copy", { autoAlpha: 0, y: 28 });
+			gsap.set(".about-feier", { autoAlpha: 0, y: 28 });
 			gsap.set(".about-head", {
 				autoAlpha: 0,
 				"--about-head-y": "28px",
@@ -449,13 +564,23 @@ function initStoryTimeline() {
 				transformOrigin: "50% 50%"
 			});
 			gsap.set(".commission-bg", { autoAlpha: 0 });
-			gsap.set(".commission-copy", { autoAlpha: 0, y: 0 });
-			gsap.set(".commission-head:not(.commission-portal-head)", { autoAlpha: 0, y: 0 });
+			gsap.set(".commission-copy", { autoAlpha: 0, y: 46 });
+			gsap.set(".commission-portal-copy", { autoAlpha: 0, y: 0, clearProps: "willChange" });
+			gsap.set(".commission-head", { clearProps: "transform" });
+			gsap.set(".commission-head:not(.commission-portal-head)", { autoAlpha: 0 });
 			gsap.set(".commission-portal", { autoAlpha: 0, clipPath: portalTurnClip, ...portalVars(pinchedFullPortalRect) });
+			gsap.set(".commission-portal-world", { autoAlpha: 1 });
 			gsap.set(".gallery-section", { autoAlpha: 1, y: "138vh" });
-			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 1, y: 0 });
+			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 1, clearProps: "transform,willChange" });
 			gsap.set(".gallery-card", { autoAlpha: 1, y: 0 });
-			gsap.set(".gallery-card.is-transition", { autoAlpha: 1, y: 0, rotateY: 0, scale: 1 });
+			gsap.set(".gallery-card.is-transition", {
+				autoAlpha: 0,
+				y: 0,
+				rotateY: 0,
+				scale: 1,
+				transformPerspective: mobile ? 800 : 1100,
+				transformOrigin: "50% 50%"
+			});
 			const tl = gsap.timeline({
 				defaults: { ease: "none" },
 				scrollTrigger: {
@@ -463,12 +588,12 @@ function initStoryTimeline() {
 					trigger: storyScroll,
 					start: "top top",
 					end: "bottom bottom",
-					scrub: 1,
+					scrub: storyScrub,
 					invalidateOnRefresh: true,
 					onUpdate: self => {
 						setThemeByProgress(self.progress);
 						syncCoverParallaxProgress(self.progress);
-						setGalleryMarqueeActive(self.progress > 0.955);
+						setGalleryMarqueeActive((self.animation?.progress() || self.progress) > 0.955);
 
 						const isCoverActive = self.progress < 0.035;
 						if (isCoverActive && !coverWasActive) playInkSweep();
@@ -479,31 +604,7 @@ function initStoryTimeline() {
 			});
 
 			tl.to({}, { duration: 1 }, 0);
-			tl.set(".about-section", { autoAlpha: 1 }, 0.14);
-			tl.to(
-				".cover-scene",
-				{
-					x: 0,
-					y: 0,
-					scale: () => initialCoverScale * (mobile ? 0.72 : 0.68),
-					rotateX: 0,
-					rotateY: 0,
-					rotation: 0,
-					duration: 0.08,
-					ease: "power3.out"
-				},
-				0.03
-			);
-			tl.to(
-				".cover-content",
-				{
-					scale: () => 0.96 / (initialCoverScale * (mobile ? 0.72 : 0.68)),
-					rotateY: 0,
-					duration: 0.08,
-					ease: "power3.out"
-				},
-				0.03
-			);
+			tl.set(".about-section", { autoAlpha: 1 }, aboutIn);
 			tl.to(
 				".cover-scene",
 				{
@@ -513,20 +614,20 @@ function initStoryTimeline() {
 					rotateX: 0,
 					rotateY: 0,
 					rotation: 0,
-					duration: 0.2,
-					ease: "power2.inOut"
+					duration: 0.25,
+					ease: "power2.out"
 				},
-				0.1
+				0.04
 			);
 			tl.to(
 				".cover-content",
 				{
 					scale: 1,
 					rotateY: 0,
-					duration: 0.2,
-					ease: "power2.inOut"
+					duration: 0.25,
+					ease: "power2.out"
 				},
-				0.1
+				0.04
 			);
 			tl.to(
 				".cover-bg",
@@ -537,10 +638,10 @@ function initStoryTimeline() {
 					bottom: "auto",
 					width: coverPortraitLayerValue("bgWidth"),
 					height: coverPortraitLayerValue("bgHeight"),
-					duration: 0.2,
-					ease: "power2.inOut"
+					duration: 0.25,
+					ease: "power2.out"
 				},
-				0.1
+				0.04
 			);
 			tl.to(
 				".cover-avatar",
@@ -548,74 +649,99 @@ function initStoryTimeline() {
 					top: coverPortraitLayerValue("avatarTop"),
 					left: coverPortraitLayerValue("avatarLeft"),
 					width: coverPortraitLayerValue("avatarWidth"),
-					duration: 0.2,
-					ease: "power2.inOut"
+					duration: 0.25,
+					ease: "power2.out"
 				},
-				0.1
+				0.04
 			);
-			tl.to(".cover-title, .scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.08 }, 0.1);
-			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, 0.2);
-			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, 0.24);
-			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, 0.25);
-			tl.to(".about-head", { autoAlpha: 1, "--about-head-y": "0px", duration: 0.12 }, 0.24);
+			if (mobile) {
+				tl.to(".cover-title", { autoAlpha: 0, y: -18, duration: 0.11 }, 0.1);
+			} else {
+				tl.to(
+					".cover-title",
+					{
+						x: coverTitleFollowTransform("x"),
+						y: coverTitleFollowTransform("y"),
+						scale: coverTitleFollowTransform("scale"),
+						duration: 0.25,
+						ease: "power2.out"
+					},
+					0.04
+				);
+				tl.to(".cover-title", { autoAlpha: 0, duration: 0.22, ease: "none" }, 0.06);
+			}
+			tl.to(".scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.11 }, 0.1);
+			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, aboutTitleIn);
+			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, aboutCopyIn);
+			tl.to(".about-feier", { autoAlpha: 1, y: 0, duration: 0.12 }, aboutSoftIn);
+			tl.to(".about-head", { autoAlpha: 1, "--about-head-y": "0px", duration: 0.12 }, aboutHeadIn);
+			tl.set(".about-title, .about-copy", { clearProps: "transform,willChange" }, aboutTextClearAt);
 
-			tl.set(".commission-section", { autoAlpha: 1 }, 0.505);
+			tl.set(".commission-section", { autoAlpha: 1 }, commissionTurnStart);
 			tl.to(".cover-scene", { autoAlpha: 0, duration: 0.1 }, 0.42);
-			tl.set(".about-head", { zIndex: 8, transition: "none" }, 0.43);
-			tl.to(".about-title, .about-copy, .about-feier, .about-portrait", { autoAlpha: 0, y: -20, duration: 0.11 }, 0.43);
+			tl.set(".about-head", { zIndex: 8, transition: "none" }, commissionTurnStart);
+			tl.to(".about-title, .about-copy, .about-feier, .about-portrait", { autoAlpha: 0, y: -20, duration: 0.08 }, commissionTurnStart);
 			tl.to(
 				".about-head",
 				{
 					x: alignToViewportCenter(".about-head", "x"),
 					y: alignToViewportCenter(".about-head", "y"),
 					scale: scaleToCoverViewport(".about-head", mobile ? 1.28 : 1.16),
-					rotateY: 90,
-					duration: 0.14,
+					duration: 0.063,
 					ease: "power2.in"
 				},
-				0.43
+				commissionTurnStart
 			);
-			tl.set(".about-head", { autoAlpha: 0 }, 0.555);
-			tl.set(".commission-portal", { ...portalVars(pinchedFullPortalRect), clipPath: portalTurnClip, autoAlpha: 1 }, 0.555);
 			tl.to(
+				".about-head",
+				{
+					rotateY: 90,
+					duration: 0.04725,
+					ease: "power2.in"
+				},
+				commissionTurnStart
+			);
+			tl.set(".about-head", { autoAlpha: 0 }, commissionFrontEdgeAt);
+			tl.set(
 				".commission-portal",
 				{
 					...portalVars(fullPortalRect),
+					clipPath: portalTurnClip,
 					autoAlpha: 1,
-					duration: 0.2,
-					ease: "power2.out"
+					rotation: 0,
+					transformOrigin: "50% 50%"
 				},
-				0.555
+				commissionFrontEdgeAt
 			);
-			tl.to(".commission-portal", { clipPath: portalMidTurnClip, duration: 0.12, ease: "power1.out" }, 0.555);
-			tl.to(".commission-portal", { clipPath: portalFlatClip, duration: 0.12, ease: "power2.inOut" }, 0.675);
-			tl.set(".about-section", { autoAlpha: 0 }, 0.755);
+			tl.to(".commission-portal", { clipPath: portalMidTurnClip, duration: commissionBackSettledAt - commissionFrontEdgeAt, ease: "power1.out" }, commissionFrontEdgeAt);
+			tl.to(".commission-portal", { clipPath: portalFlatClip, duration: commissionRevealSettledAt - commissionBackSettledAt, ease: "power2.out" }, commissionBackSettledAt);
+			tl.set(".commission-bg, .commission-head:not(.commission-portal-head)", { autoAlpha: 1 }, commissionRevealSettledAt);
+			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12, ease: "power2.out" }, commissionRevealSettledAt);
+			tl.set(".commission-portal", { autoAlpha: 0 }, commissionRevealSettledAt);
+			tl.set(".about-section", { autoAlpha: 0 }, commissionRevealSettledAt);
+			tl.set(".commission-copy", { clearProps: "transform,willChange" }, commissionRevealSettledAt + 0.13);
+			tl.set(".gallery-section", { y: 0 }, 0.8);
+			tl.set(".gallery-section", { clearProps: "transform" }, 0.801);
+			tl.set(".gallery-section h2, .gallery-intro", { clearProps: "transform,willChange" }, 0.801);
+			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, 0.8);
 			tl.to(
-				".commission-portal",
+				".commission-section",
 				{
-					...portalVars(exitCoverPortalRect, { rotation: mobile ? -3 : -5, worldY: mobile ? -64 : -96 }),
-					clipPath: portalFlatClip,
-					autoAlpha: 1,
-					duration: 0.17,
-					ease: "power2.inOut"
+					x: commissionExitTransform("x"),
+					y: commissionExitTransform("y"),
+					scale: commissionExitTransform("scale"),
+					clipPath: commissionExitClipPath,
+					duration: 0.155,
+					ease: "power3.inOut"
 				},
-				0.78
+				0.8
 			);
-			tl.to(".gallery-section", { y: 0, duration: 0.25, ease: "none" }, 0.84);
-			tl.to(
-				".commission-portal",
-				{
-					...portalVars(exitFlyPortalRect, { rotation: mobile ? -6 : -9, worldY: mobile ? -104 : -152 }),
-					clipPath: portalFlatClip,
-					autoAlpha: 0,
-					duration: 0.2,
-					ease: "power2.in"
-				},
-				0.92
-			);
-			tl.to(".commission-section", { autoAlpha: 0, duration: 0.12 }, 1.04);
+			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, 0.955);
+			tl.set(".commission-section", { autoAlpha: 0 }, 0.955);
+			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, 0.956);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
+			clearReadableTextTransforms(".cover-title, .scroll-cue");
 			playInkSweep();
 		}
 	);
@@ -627,6 +753,7 @@ function initReducedStory() {
 
 	gsap.set(".section", { autoAlpha: 0 });
 	gsap.set(".cover-section", { autoAlpha: 1 });
+	gsap.set(".cover-title, .scroll-cue", { autoAlpha: 1, clearProps: "transform,willChange" });
 	gsap.set(".cover-parallax-frame", { clearProps: "transform" });
 	gsap.set(".cover-bg", { clearProps: "top,left,right,bottom,width,height" });
 	gsap.set(".cover-scene", {
