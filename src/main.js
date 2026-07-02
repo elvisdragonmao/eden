@@ -738,6 +738,7 @@ function initStoryTimeline() {
 			);
 			tl.set(".commission-portal", { autoAlpha: 0 }, galleryExitEnd);
 			tl.set(".commission-section", { autoAlpha: 0 }, galleryExitEnd);
+			tl.set(".gallery-card.is-transition", { clearProps: "transform" }, galleryClearAt);
 			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, galleryClearAt);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
