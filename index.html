@@ -16,17 +16,17 @@
 		<meta property="og:title" content="伊甸 | 一條藍色的龍" />
 		<meta property="og:description" content="伊甸的一頁式個人網站，收錄關於伊甸、委託資訊與圖集作品。" />
 		<meta property="og:url" content="https://eden.emtech.cc/" />
-		<meta property="og:image" content="https://eden.emtech.cc/og-image.webp" />
-		<meta property="og:image:secure_url" content="https://eden.emtech.cc/og-image.webp" />
+		<meta property="og:image" content="https://eden.emtech.cc/og.webp" />
+		<meta property="og:image:secure_url" content="https://eden.emtech.cc/og.webp" />
 		<meta property="og:image:type" content="image/webp" />
 		<meta property="og:image:width" content="1200" />
-		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="伊甸網站的黃色與藍紫色星空背景" />
+		<meta property="og:image:height" content="600" />
+		<meta property="og:image:alt" content="伊甸的藍色龍角色預覽圖" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content="伊甸 | 一條藍色的龍" />
 		<meta name="twitter:description" content="伊甸的一頁式個人網站，收錄關於伊甸、委託資訊與圖集作品。" />
-		<meta name="twitter:image" content="https://eden.emtech.cc/og-image.webp" />
-		<meta name="twitter:image:alt" content="伊甸網站的黃色與藍紫色星空背景" />
+		<meta name="twitter:image" content="https://eden.emtech.cc/og.webp" />
+		<meta name="twitter:image:alt" content="伊甸的藍色龍角色預覽圖" />
 		<script type="application/ld+json">
 			{
 				"@context": "https://schema.org",
@@ -73,11 +73,11 @@
 					{
 						"@type": "ImageObject",
 						"@id": "https://eden.emtech.cc/#primaryimage",
-						"url": "https://eden.emtech.cc/og-image.webp",
-						"contentUrl": "https://eden.emtech.cc/og-image.webp",
+						"url": "https://eden.emtech.cc/og.webp",
+						"contentUrl": "https://eden.emtech.cc/og.webp",
 						"width": 1200,
-						"height": 630,
-						"caption": "伊甸網站的黃色與藍紫色星空背景"
+						"height": 600,
+						"caption": "伊甸的藍色龍角色預覽圖"
 					}
 				]
 			}
@@ -89,7 +89,28 @@
 		</script>
 		<link rel="stylesheet" href="/src/style.css" />
 	</head>
-	<body>
+	<body class="is-loading">
+		<div class="site-loader" role="status" aria-live="polite" aria-label="網站載入中">
+			<div class="loader-core" aria-hidden="true">
+				<div class="loader-mark">
+					<img src="/img/head.webp" alt="" decoding="async" fetchpriority="high" />
+				</div>
+				<div class="loader-title">伊甸</div>
+				<div class="loader-progress"><span></span></div>
+			</div>
+		</div>
+		<noscript>
+			<style>
+				body.is-loading {
+					overflow: auto;
+				}
+
+				.site-loader {
+					display: none !important;
+				}
+			</style>
+		</noscript>
+
 		<div class="site-chrome" data-theme="light">
 			<div class="desktop-frame" aria-hidden="true">
 				<div class="desktop-nav">
@@ -151,8 +172,8 @@
 										<div class="cover-bg" aria-hidden="true"></div>
 										<h1 class="cover-title">伊甸</h1>
 										<div class="cover-avatar" aria-hidden="true">
-											<img class="cover-avatar-base" src="/img/cover-avatar.webp" alt="" decoding="async" />
-											<img class="cover-avatar-color" src="/img/cover-avatar.webp" alt="" decoding="async" />
+											<img class="cover-avatar-base" src="/img/cover-avatar.webp" alt="" decoding="async" fetchpriority="high" />
+											<img class="cover-avatar-color" src="/img/cover-avatar.webp" alt="" decoding="async" fetchpriority="high" />
 										</div>
 									</div>
 								</div>
@@ -258,7 +279,7 @@
 									data-author="諾比"
 									data-author-url="https://www.facebook.com/lin.lu.767699"
 								>
-									<img src="/img/head.webp" alt="星光頭像" />
+									<img src="/img/head.webp" alt="星光頭像" loading="lazy" decoding="async" />
 								</button>
 								<button
 									class="gallery-card"
@@ -269,7 +290,7 @@
 									data-author="Saki / 久心"
 									data-author-url="https://slow.work"
 								>
-									<img src="/img/me/slow.webp" alt="名片插圖" />
+									<img src="/img/me/slow.webp" alt="名片插圖" loading="lazy" decoding="async" />
 								</button>
 								<button
 									class="gallery-card is-narrow"
@@ -280,7 +301,7 @@
 									data-author="菲爾"
 									data-author-url="https://www.facebook.com/yin.chuan.fei.er/photos"
 								>
-									<img src="/img/feier.webp" alt="菲爾掉落" />
+									<img src="/img/feier.webp" alt="菲爾掉落" loading="lazy" decoding="async" />
 								</button>
 								<button
 									class="gallery-card"
@@ -291,7 +312,7 @@
 									data-author="nullma"
 									data-author-url="https://x.com/chocomint_null"
 								>
-									<img src="/img/me/nullma.webp" alt="Nullma 插圖" />
+									<img src="/img/me/nullma.webp" alt="Nullma 插圖" loading="lazy" decoding="async" />
 								</button>
 								<button
 									class="gallery-card"
@@ -302,7 +323,7 @@
 									data-author="小歐"
 									data-author-url="https://www.facebook.com/orion910506"
 								>
-									<img src="/img/me/orion.webp" alt="Orion 插圖" />
+									<img src="/img/me/orion.webp" alt="Orion 插圖" loading="lazy" decoding="async" />
 								</button>
 								<button
 									class="gallery-card"
@@ -313,13 +334,13 @@
 									data-author="小雨"
 									data-author-url="https://www.facebook.com/xiao.yu.702647"
 								>
-									<img src="/img/me/xiaoyu.webp" alt="贈圖（舊設定）" />
+									<img src="/img/me/xiaoyu.webp" alt="贈圖（舊設定）" loading="lazy" decoding="async" />
 								</button>
 								<button class="gallery-card" type="button" style="--gallery-aspect: 1 / 1" data-full="/img/me/fursona.webp" data-caption="高中時畫的醜醜的設定">
-									<img src="/img/me/fursona.webp" alt="高中時畫的醜醜的設定" />
+									<img src="/img/me/fursona.webp" alt="高中時畫的醜醜的設定" loading="lazy" decoding="async" />
 								</button>
 								<button class="gallery-card" type="button" style="--gallery-aspect: 1 / 1" data-full="/img/me/birthday-2024.webp" data-caption="2024 生日自繪">
-									<img src="/img/me/birthday-2024.webp" alt="2024 生日自繪" />
+									<img src="/img/me/birthday-2024.webp" alt="2024 生日自繪" loading="lazy" decoding="async" />
 								</button>
 							</div>
 						</div>

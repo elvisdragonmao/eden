@@ -20,6 +20,7 @@ const lightboxImage = document.querySelector(".lightbox-image");
 const lightboxCaption = document.querySelector(".lightbox-caption p");
 const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
+const siteLoader = document.querySelector(".site-loader");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
 let storyMatchMedia;
@@ -33,6 +34,16 @@ const portalMidTurnClip = "polygon(17% -8%, 82% -12%, 87% 112%, 21% 106%)";
 const portalFlatClip = "polygon(-12% -12%, 112% -12%, 112% 112%, -12% 112%)";
 const storyScrub = 0.24;
 const readableTextSelector = ".cover-title, .scroll-cue, .about-title, .about-copy, .commission-copy, .gallery-section h2, .gallery-intro";
+const criticalAssetUrls = [
+	"/img/cover-avatar.webp",
+	"/img/cover-bg.webp",
+	"/img/commission-bg.webp",
+	"/img/head.webp",
+	"/img/mask/inkmask.png",
+	"/img/mask/mask-portrait.svg",
+	"/img/mask/mask-square.svg"
+];
+const bootFallbackMs = 6500;
 
 if ("scrollRestoration" in window.history) {
 	window.history.scrollRestoration = "manual";
@@ -200,6 +211,54 @@ function syncMobileGalleryCredit() {
 function syncResponsiveLayoutVars() {
 	syncCoverBackgroundScale();
 	syncMobileGalleryCredit();
+}
+
+function nextPaint() {
+	return new Promise(resolve => {
+		requestAnimationFrame(() => requestAnimationFrame(resolve));
+	});
+}
+
+function waitForImage(source) {
+	return new Promise(resolve => {
+		const image = new Image();
+		image.decoding = "async";
+		image.onload = resolve;
+		image.onerror = resolve;
+		image.src = source;
+		if (image.complete) resolve();
+	});
+}
+
+function waitForCriticalAssets() {
+	const imageSources = new Set(criticalAssetUrls);
+	document.querySelectorAll(".cover-avatar img, .about-head img, .about-portrait img, .commission-head img").forEach(image => {
+		const source = image.currentSrc || image.src || image.getAttribute("src");
+		if (source) imageSources.add(source);
+	});
+
+	const imagePromises = Array.from(imageSources, waitForImage);
+	const fontPromise = document.fonts?.ready?.catch(() => {}) || Promise.resolve();
+	const readyPromise = Promise.allSettled([...imagePromises, fontPromise]);
+	const fallbackPromise = new Promise(resolve => window.setTimeout(resolve, bootFallbackMs));
+
+	return Promise.race([readyPromise, fallbackPromise]);
+}
+
+function hideLoader() {
+	document.body.classList.add("is-ready");
+	document.body.classList.remove("is-loading");
+	siteLoader?.setAttribute("aria-hidden", "true");
+}
+
+function scrollToHashTarget() {
+	if (!window.location.hash) return;
+
+	const target = document.querySelector(window.location.hash);
+	if (!target) return;
+
+	window.scrollTo({ top: target.offsetTop, behavior: "instant" });
+	ScrollTrigger.update();
 }
 
 function resetCoverAvatarLayout() {
@@ -1019,30 +1078,40 @@ function initLightbox() {
 	lightboxImage.draggable = false;
 }
 
-syncResponsiveLayoutVars();
-window.addEventListener("resize", handleViewportResize);
+async function bootSite() {
+	syncResponsiveLayoutVars();
+	initMenu();
+	initLightbox();
 
-if (!prefersReducedMotion) {
-	initInkSweep();
-	initPointerParallax();
-	initGalleryMarquee();
-	initStoryTimeline();
-} else {
-	initReducedStory();
+	await waitForCriticalAssets();
+	await nextPaint();
+	syncResponsiveLayoutVars();
+
+	if (!prefersReducedMotion) {
+		initInkSweep();
+		initPointerParallax();
+		initGalleryMarquee();
+		initStoryTimeline();
+	} else {
+		initReducedStory();
+	}
+
+	await nextPaint();
+	syncResponsiveLayoutVars();
+	ScrollTrigger.refresh();
+	scrollToHashTarget();
+	hideLoader();
 }
 
-initMenu();
-initLightbox();
-
+syncResponsiveLayoutVars();
+window.addEventListener("resize", handleViewportResize);
 window.addEventListener("load", () => {
 	syncResponsiveLayoutVars();
 	ScrollTrigger.refresh();
+	scrollToHashTarget();
+});
 
-	if (window.location.hash) {
-		const target = document.querySelector(window.location.hash);
-		if (target) {
-			window.scrollTo({ top: target.offsetTop, behavior: "instant" });
-			ScrollTrigger.update();
-		}
-	}
+bootSite().catch(error => {
+	console.error(error);
+	hideLoader();
 });
