@@ -443,10 +443,16 @@ button {
 	font-size: 0.62em;
 }
 
+.about-title-line {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0;
+}
+
 .about-title-small {
 	display: inline-block;
-	font-size: 0.618em;
-	margin-inline: -0.08em;
+	font-size: 0.68em;
+	margin-inline: -0.12em;
 	position: relative;
 	top: -0.04em;
 }

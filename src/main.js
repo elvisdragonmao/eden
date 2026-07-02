@@ -599,15 +599,20 @@ function initStoryTimeline() {
 					invalidateOnRefresh: true,
 					onUpdate: self => {
 						const timelineTime = self.animation?.time() ?? self.progress * storyEndAt;
+						const isAtStoryEnd = self.progress >= 0.998;
 
 						setThemeByProgress(timelineTime);
 						syncCoverParallaxProgress(timelineTime);
-						setGalleryMarqueeActive(timelineTime >= galleryExitEnd);
+						setGalleryMarqueeActive(isAtStoryEnd || timelineTime >= galleryExitEnd);
 
 						const isCoverActive = timelineTime < 0.035;
 						if (isCoverActive && !coverWasActive) playInkSweep();
 						if (!isCoverActive) coverScene?.classList.add("is-ink-complete");
 						coverWasActive = isCoverActive;
+					},
+					onScrubComplete: self => {
+						const timelineTime = self.animation?.time() ?? self.progress * storyEndAt;
+						if (self.progress >= 0.998 || timelineTime >= galleryExitEnd) setGalleryMarqueeActive(true);
 					}
 				}
 			});
