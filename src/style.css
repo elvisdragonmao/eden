@@ -292,7 +292,7 @@ button {
 
 .cover-title {
 	position: absolute;
-	z-index: 3;
+	z-index: 1;
 	left: clamp(48px, 5.2vw, 80px);
 	bottom: clamp(44px, 5.8vh, 72px);
 	margin: 0;
@@ -613,11 +613,11 @@ button {
 .commission-bg,
 .commission-portal-bg {
 	background-image: url("/img/commission-bg.webp");
-	transform: translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0) scale(var(--commission-bg-scale));
 }
 
 .commission-bg {
 	z-index: 1;
+	transform: translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0) scale(var(--commission-bg-scale));
 }
 
 .commission-copy,
@@ -698,6 +698,8 @@ button {
 	inset: 0;
 	background-position: center;
 	background-size: cover;
+	transform: scale(1.2);
+	transform-origin: center;
 }
 
 .commission-portal-copy {
@@ -711,6 +713,9 @@ button {
 .gallery-section {
 	z-index: 4;
 	min-height: 100svh;
+	--gallery-edge-gap: clamp(48px, 8.5vh, 78px);
+	--gallery-social-offset: 64px;
+	--gallery-corner-gap: clamp(20px, 3.5vh, 34px);
 	background: #fff;
 	color: #000;
 	opacity: 0;
@@ -742,8 +747,8 @@ button {
 
 .gallery-intro {
 	position: absolute;
-	bottom: clamp(48px, 8.5vh, 78px);
-	left: clamp(64px, 6.7vw, 101px);
+	bottom: var(--gallery-edge-gap);
+	left: calc(var(--gallery-edge-gap) + var(--gallery-social-offset));
 	z-index: 2;
 	display: grid;
 	gap: 0;
@@ -754,8 +759,8 @@ button {
 
 .site-credit {
 	position: absolute;
-	right: clamp(48px, 4vw, 60px);
-	bottom: clamp(20px, 3.5vh, 34px);
+	right: var(--gallery-corner-gap);
+	bottom: var(--gallery-corner-gap);
 	margin: 0;
 	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 	font-size: 16px;
@@ -1156,7 +1161,14 @@ button {
 	.commission-bg,
 	.commission-portal-bg {
 		background-position: center;
+	}
+
+	.commission-bg {
 		transform: scale(var(--commission-bg-scale));
+	}
+
+	.commission-portal-bg {
+		transform: scale(1.2);
 	}
 
 	.commission-copy,
@@ -1186,6 +1198,9 @@ button {
 
 	.gallery-section {
 		min-height: 966px;
+		--gallery-edge-gap: 45px;
+		--gallery-social-offset: 0px;
+		--gallery-corner-gap: 25px;
 	}
 
 	.gallery-top-rule {
@@ -1256,12 +1271,12 @@ button {
 	}
 
 	.site-credit {
-		right: 0;
-		bottom: 25px;
-		left: 0;
+		right: var(--gallery-corner-gap);
+		bottom: var(--gallery-corner-gap);
+		left: auto;
 		width: auto;
 		font-size: 16px;
-		text-align: center;
+		text-align: right;
 	}
 
 	.lightbox {

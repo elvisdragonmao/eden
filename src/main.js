@@ -238,29 +238,6 @@ function coverPortraitLayerValue(property) {
 	return () => `${coverPortraitLayerLayout()[property] || 0}px`;
 }
 
-function coverTitleFollowTransform(axis) {
-	return () => {
-		const title = baseRect(document.querySelector(".cover-title"));
-		const metrics = coverContentTargetMetrics();
-		if (!title || !metrics) {
-			if (axis === "scale") return 1;
-			return 0;
-		}
-
-		const { scale, contentLeft, contentTop } = metrics;
-		const sourceCenterX = title.left + title.width / 2;
-		const sourceCenterY = title.top + title.height / 2;
-		const targetCenterX = contentLeft + sourceCenterX * scale;
-		const targetCenterY = contentTop + sourceCenterY * scale;
-
-		if (axis === "x") return targetCenterX - sourceCenterX;
-		if (axis === "y") return targetCenterY - sourceCenterY;
-		if (axis === "scale") return scale;
-
-		return 0;
-	};
-}
-
 function alignToElement(fromSelector, toSelector, axis) {
 	return () => {
 		const from = baseRect(document.querySelector(fromSelector));
@@ -468,7 +445,7 @@ function setThemeByProgress(progress) {
 		return;
 	}
 
-	if (progress < 0.82) {
+	if (progress < 0.75) {
 		setChromeTheme("light");
 		return;
 	}
@@ -515,6 +492,25 @@ function initStoryTimeline() {
 			const commissionFrontEdgeAt = 0.47725;
 			const commissionBackSettledAt = 0.5275;
 			const commissionRevealSettledAt = 0.56;
+			const commissionTextIn = commissionFrontEdgeAt + (commissionBackSettledAt - commissionFrontEdgeAt) * 0.5;
+			const galleryExitStart = commissionRevealSettledAt + 0.035;
+			const galleryExitDuration = 0.155;
+			const galleryExitEnd = galleryExitStart + galleryExitDuration;
+			const galleryClearAt = galleryExitEnd + 0.001;
+			const coverScaleProgress = { value: 0 };
+			const coverSceneScaleEase = gsap.parseEase("power2.out");
+			const coverVisualScaleEase = gsap.parseEase("power2.out");
+			const coverTargetScale = scaleToElementHeight(".cover-scene", ".about-portrait");
+			const updateCoverScales = () => {
+				const sceneProgress = coverSceneScaleEase(coverScaleProgress.value);
+				const visualProgress = coverVisualScaleEase(coverScaleProgress.value);
+				const targetScale = coverTargetScale();
+				const sceneScale = initialCoverScale + (targetScale - initialCoverScale) * sceneProgress;
+				const visualScale = 1 + (targetScale - 1) * visualProgress;
+
+				gsap.set(".cover-scene", { scale: sceneScale });
+				gsap.set(".cover-content", { scale: visualScale / sceneScale });
+			};
 
 			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
@@ -565,11 +561,12 @@ function initStoryTimeline() {
 			});
 			gsap.set(".commission-bg", { autoAlpha: 0 });
 			gsap.set(".commission-copy", { autoAlpha: 0, y: 46 });
-			gsap.set(".commission-portal-copy", { autoAlpha: 0, y: 0, clearProps: "willChange" });
+			gsap.set(".commission-portal-copy", { autoAlpha: 0, y: 46, clearProps: "willChange" });
 			gsap.set(".commission-head", { clearProps: "transform" });
 			gsap.set(".commission-head:not(.commission-portal-head)", { autoAlpha: 0 });
 			gsap.set(".commission-portal", { autoAlpha: 0, clipPath: portalTurnClip, ...portalVars(pinchedFullPortalRect) });
 			gsap.set(".commission-portal-world", { autoAlpha: 1 });
+			gsap.set(".commission-portal-bg", { scale: 1.2, transformOrigin: "50% 50%" });
 			gsap.set(".gallery-section", { autoAlpha: 1, y: "138vh" });
 			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 1, clearProps: "transform,willChange" });
 			gsap.set(".gallery-card", { autoAlpha: 1, y: 0 });
@@ -593,7 +590,7 @@ function initStoryTimeline() {
 					onUpdate: self => {
 						setThemeByProgress(self.progress);
 						syncCoverParallaxProgress(self.progress);
-						setGalleryMarqueeActive((self.animation?.progress() || self.progress) > 0.955);
+						setGalleryMarqueeActive((self.animation?.progress() || self.progress) > galleryExitEnd);
 
 						const isCoverActive = self.progress < 0.035;
 						if (isCoverActive && !coverWasActive) playInkSweep();
@@ -610,7 +607,6 @@ function initStoryTimeline() {
 				{
 					x: alignToElement(".cover-scene", ".about-portrait", "x"),
 					y: alignToElement(".cover-scene", ".about-portrait", "y"),
-					scale: scaleToElementHeight(".cover-scene", ".about-portrait"),
 					rotateX: 0,
 					rotateY: 0,
 					rotation: 0,
@@ -620,12 +616,12 @@ function initStoryTimeline() {
 				0.04
 			);
 			tl.to(
-				".cover-content",
+				coverScaleProgress,
 				{
-					scale: 1,
-					rotateY: 0,
+					value: 1,
 					duration: 0.25,
-					ease: "power2.out"
+					ease: "none",
+					onUpdate: updateCoverScales
 				},
 				0.04
 			);
@@ -654,22 +650,7 @@ function initStoryTimeline() {
 				},
 				0.04
 			);
-			if (mobile) {
-				tl.to(".cover-title", { autoAlpha: 0, y: -18, duration: 0.11 }, 0.1);
-			} else {
-				tl.to(
-					".cover-title",
-					{
-						x: coverTitleFollowTransform("x"),
-						y: coverTitleFollowTransform("y"),
-						scale: coverTitleFollowTransform("scale"),
-						duration: 0.25,
-						ease: "power2.out"
-					},
-					0.04
-				);
-				tl.to(".cover-title", { autoAlpha: 0, duration: 0.22, ease: "none" }, 0.06);
-			}
+			tl.to(".cover-title", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.11 }, 0.1);
 			tl.to(".scroll-cue", { autoAlpha: 0, y: mobile ? -18 : -32, duration: 0.11 }, 0.1);
 			tl.to(".about-title", { autoAlpha: 1, x: 0, y: 0, duration: 0.12 }, aboutTitleIn);
 			tl.to(".about-copy", { autoAlpha: 1, y: 0, stagger: 0.025, duration: 0.12 }, aboutCopyIn);
@@ -714,16 +695,18 @@ function initStoryTimeline() {
 				commissionFrontEdgeAt
 			);
 			tl.to(".commission-portal", { clipPath: portalMidTurnClip, duration: commissionBackSettledAt - commissionFrontEdgeAt, ease: "power1.out" }, commissionFrontEdgeAt);
+			tl.to(".commission-portal-bg", { scale: 1, duration: commissionBackSettledAt - commissionFrontEdgeAt, ease: "power2.out" }, commissionFrontEdgeAt);
+			tl.to(".commission-portal-copy", { autoAlpha: 1, y: 0, duration: commissionRevealSettledAt - commissionTextIn, ease: "power2.out" }, commissionTextIn);
 			tl.to(".commission-portal", { clipPath: portalFlatClip, duration: commissionRevealSettledAt - commissionBackSettledAt, ease: "power2.out" }, commissionBackSettledAt);
 			tl.set(".commission-bg, .commission-head:not(.commission-portal-head)", { autoAlpha: 1 }, commissionRevealSettledAt);
-			tl.to(".commission-copy", { autoAlpha: 1, y: 0, duration: 0.12, ease: "power2.out" }, commissionRevealSettledAt);
+			tl.set(".commission-copy", { autoAlpha: 1, y: 0 }, commissionRevealSettledAt);
 			tl.set(".commission-portal", { autoAlpha: 0 }, commissionRevealSettledAt);
 			tl.set(".about-section", { autoAlpha: 0 }, commissionRevealSettledAt);
 			tl.set(".commission-copy", { clearProps: "transform,willChange" }, commissionRevealSettledAt + 0.13);
-			tl.set(".gallery-section", { y: 0 }, 0.8);
-			tl.set(".gallery-section", { clearProps: "transform" }, 0.801);
-			tl.set(".gallery-section h2, .gallery-intro", { clearProps: "transform,willChange" }, 0.801);
-			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, 0.8);
+			tl.set(".gallery-section", { y: 0 }, galleryExitStart);
+			tl.set(".gallery-section", { clearProps: "transform" }, galleryClearAt);
+			tl.set(".gallery-section h2, .gallery-intro", { clearProps: "transform,willChange" }, galleryClearAt);
+			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, galleryExitStart);
 			tl.to(
 				".commission-section",
 				{
@@ -731,14 +714,14 @@ function initStoryTimeline() {
 					y: commissionExitTransform("y"),
 					scale: commissionExitTransform("scale"),
 					clipPath: commissionExitClipPath,
-					duration: 0.155,
+					duration: galleryExitDuration,
 					ease: "power3.inOut"
 				},
-				0.8
+				galleryExitStart
 			);
-			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, 0.955);
-			tl.set(".commission-section", { autoAlpha: 0 }, 0.955);
-			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, 0.956);
+			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, galleryExitEnd);
+			tl.set(".commission-section", { autoAlpha: 0 }, galleryExitEnd);
+			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, galleryClearAt);
 
 			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
 			clearReadableTextTransforms(".cover-title, .scroll-cue");
