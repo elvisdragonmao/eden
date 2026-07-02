@@ -48,7 +48,7 @@ viewBox = 0 0 256 240
 但它們的 `viewBox` 不一樣，所以不能直接把兩段 path 拿來硬 morph。建議先選一個主座標系，我這裡用 `mask-portrait.svg` 的座標：
 
 ```html
-<svg viewBox="0 0 533 806">
+<svg viewBox="0 0 533 806"></svg>
 ```
 
 然後把 `mask-square.svg` 的 path 轉到同一個 `533 × 806` 座標系裡。
@@ -79,7 +79,9 @@ square：有 M + C + H + V + L + C...
 如果只用 GSAP core 的：
 
 ```js
-attr: { d: nextPath }
+attr: {
+	d: nextPath;
+}
 ```
 
 在兩個 path 指令數量、結構不同時，morph 很容易失敗或變得很怪。
@@ -95,35 +97,30 @@ MorphSVGPlugin 的用途就是讓不同 SVG path 可以被補點、配對、morp
 
 ```html
 <section class="portal-stage">
-  <div class="world current-world">
-    <!-- 原本的畫面。完全不要 transform。 -->
-  </div>
+	<div class="world current-world">
+		<!-- 原本的畫面。完全不要 transform。 -->
+	</div>
 
-  <div class="world next-world">
-    <!-- 下一個世界，可以是圖片、影片、canvas、Three.js scene、DOM 內容 -->
-  </div>
+	<div class="world next-world">
+		<!-- 下一個世界，可以是圖片、影片、canvas、Three.js scene、DOM 內容 -->
+	</div>
 
-  <svg
-    class="portal-svg"
-    viewBox="0 0 533 806"
-    preserveAspectRatio="none"
-    aria-hidden="true"
-  >
-    <defs>
-      <clipPath id="portalClip" clipPathUnits="userSpaceOnUse">
-        <path id="portalClipPath" d="" />
-      </clipPath>
-    </defs>
+	<svg class="portal-svg" viewBox="0 0 533 806" preserveAspectRatio="none" aria-hidden="true">
+		<defs>
+			<clipPath id="portalClip" clipPathUnits="userSpaceOnUse">
+				<path id="portalClipPath" d="" />
+			</clipPath>
+		</defs>
 
-    <!-- 視覺厚度：陰影放在最底 -->
-    <path id="portalShadow" d="" fill="none" />
+		<!-- 視覺厚度：陰影放在最底 -->
+		<path id="portalShadow" d="" fill="none" />
 
-    <!-- 外光暈 -->
-    <path id="portalGlow" d="" fill="none" />
+		<!-- 外光暈 -->
+		<path id="portalGlow" d="" fill="none" />
 
-    <!-- 真正邊框 -->
-    <path id="portalRim" d="" fill="none" />
-  </svg>
+		<!-- 真正邊框 -->
+		<path id="portalRim" d="" fill="none" />
+	</svg>
 </section>
 ```
 
@@ -133,64 +130,64 @@ MorphSVGPlugin 的用途就是讓不同 SVG path 可以被補點、配對、morp
 
 ```css
 .portal-stage {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  isolation: isolate;
-  background: #05070c;
+	position: relative;
+	width: 100%;
+	height: 100vh;
+	overflow: hidden;
+	isolation: isolate;
+	background: #05070c;
 }
 
 .world {
-  position: absolute;
-  inset: 0;
+	position: absolute;
+	inset: 0;
 }
 
 .current-world {
-  z-index: 1;
+	z-index: 1;
 }
 
 .next-world {
-  z-index: 2;
-  clip-path: url(#portalClip);
-  opacity: 0;
+	z-index: 2;
+	clip-path: url(#portalClip);
+	opacity: 0;
 
-  /* 內容本身可以有一點點 scale，但不要 rotateX / rotateY */
-  transform: scale(1.03);
-  transform-origin: center;
-  will-change: opacity, transform;
+	/* 內容本身可以有一點點 scale，但不要 rotateX / rotateY */
+	transform: scale(1.03);
+	transform-origin: center;
+	will-change: opacity, transform;
 }
 
 .portal-svg {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: visible;
 }
 
 #portalShadow {
-  stroke: rgba(0, 0, 0, 0.55);
-  stroke-width: 34;
-  filter: blur(14px);
-  transform: translateY(18px);
-  opacity: 0;
+	stroke: rgba(0, 0, 0, 0.55);
+	stroke-width: 34;
+	filter: blur(14px);
+	transform: translateY(18px);
+	opacity: 0;
 }
 
 #portalGlow {
-  stroke: rgba(120, 190, 255, 0.65);
-  stroke-width: 28;
-  filter: blur(18px);
-  opacity: 0;
+	stroke: rgba(120, 190, 255, 0.65);
+	stroke-width: 28;
+	filter: blur(18px);
+	opacity: 0;
 }
 
 #portalRim {
-  stroke: rgba(210, 235, 255, 0.95);
-  stroke-width: 7;
-  filter: drop-shadow(0 0 16px rgba(120, 190, 255, 0.9));
-  opacity: 0;
+	stroke: rgba(210, 235, 255, 0.95);
+	stroke-width: 7;
+	filter: drop-shadow(0 0 16px rgba(120, 190, 255, 0.9));
+	opacity: 0;
 }
 ```
 
@@ -205,7 +202,7 @@ MorphSVGPlugin 的用途就是讓不同 SVG path 可以被補點、配對、morp
 
 ```js
 const PATHS = {
-  portrait: `
+	portrait: `
     M533 734.338
     C533 747.068 527.943 759.277 518.941 768.279
     L495.279 791.941
@@ -227,7 +224,7 @@ const PATHS = {
     Z
   `,
 
-  square: `
+	square: `
     M 32.271 203.125
     C 32.271 175.528 54.643 153.156 82.24 153.156
     L 481.99 153.156
@@ -245,7 +242,7 @@ const PATHS = {
     Z
   `,
 
-  tiltDown: `
+	tiltDown: `
     M 99.26 327.065
     C 103.659 312.715 122.437 301.081 141.203 301.081
     L 413.033 301.081
@@ -277,83 +274,98 @@ import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 // CDN 用法則是確認 MorphSVGPlugin 已經載入後再 register。
 gsap.registerPlugin(MorphSVGPlugin);
 
-const morphTargets = [
-  "#portalClipPath",
-  "#portalShadow",
-  "#portalGlow",
-  "#portalRim"
-];
+const morphTargets = ["#portalClipPath", "#portalShadow", "#portalGlow", "#portalRim"];
 
 // 初始狀態：全部 path 都是 portrait
 // 這樣 clip 範圍、shadow、glow、rim 會完全同步。
 gsap.set(morphTargets, {
-  attr: { d: PATHS.portrait }
+	attr: { d: PATHS.portrait }
 });
 
 gsap.set(".next-world", {
-  opacity: 0,
-  scale: 1.03
+	opacity: 0,
+	scale: 1.03
 });
 
 gsap.set(["#portalShadow", "#portalGlow", "#portalRim"], {
-  opacity: 0
+	opacity: 0
 });
 
 const portalTl = gsap.timeline({
-  paused: true,
-  defaults: {
-    ease: "power3.inOut"
-  }
+	paused: true,
+	defaults: {
+		ease: "power3.inOut"
+	}
 });
 
 portalTl
-  // portal 開始出現
-  .to(".next-world", {
-    opacity: 1,
-    scale: 1,
-    duration: 0.5
-  }, 0)
+	// portal 開始出現
+	.to(
+		".next-world",
+		{
+			opacity: 1,
+			scale: 1,
+			duration: 0.5
+		},
+		0
+	)
 
-  .to(["#portalShadow", "#portalGlow", "#portalRim"], {
-    opacity: 1,
-    duration: 0.35
-  }, 0)
+	.to(
+		["#portalShadow", "#portalGlow", "#portalRim"],
+		{
+			opacity: 1,
+			duration: 0.35
+		},
+		0
+	)
 
-  // 第一段：從直式洞口壓成一個往下傾斜的 portal
-  .to(morphTargets, {
-    duration: 0.8,
-    morphSVG: {
-      shape: PATHS.tiltDown,
-      type: "rotational"
-    }
-  }, 0)
+	// 第一段：從直式洞口壓成一個往下傾斜的 portal
+	.to(
+		morphTargets,
+		{
+			duration: 0.8,
+			morphSVG: {
+				shape: PATHS.tiltDown,
+				type: "rotational"
+			}
+		},
+		0
+	)
 
-  // 第二段：打開到方形世界
-  .to(morphTargets, {
-    duration: 0.9,
-    morphSVG: {
-      shape: PATHS.square,
-      type: "rotational"
-    }
-  }, 0.65)
+	// 第二段：打開到方形世界
+	.to(
+		morphTargets,
+		{
+			duration: 0.9,
+			morphSVG: {
+				shape: PATHS.square,
+				type: "rotational"
+			}
+		},
+		0.65
+	)
 
-  // 增加一點 portal energy
-  .to("#portalGlow", {
-    strokeWidth: 42,
-    opacity: 0.95,
-    duration: 0.35,
-    yoyo: true,
-    repeat: 1,
-    ease: "power2.out"
-  }, 0.35);
+	// 增加一點 portal energy
+	.to(
+		"#portalGlow",
+		{
+			strokeWidth: 42,
+			opacity: 0.95,
+			duration: 0.35,
+			yoyo: true,
+			repeat: 1,
+			ease: "power2.out"
+		},
+		0.35
+	);
 
 // 例如：hover 開啟，離開關閉
 document.querySelector(".portal-stage").addEventListener("mouseenter", () => {
-  portalTl.play();
+	portalTl.play();
 });
 
 document.querySelector(".portal-stage").addEventListener("mouseleave", () => {
-  portalTl.reverse();
+	portalTl.reverse();
 });
 ```
 
@@ -369,40 +381,56 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(MorphSVGPlugin, ScrollTrigger);
 
 const portalTl = gsap.timeline({
-  scrollTrigger: {
-    trigger: ".portal-stage",
-    start: "top top",
-    end: "+=1200",
-    scrub: true,
-    pin: true
-  }
+	scrollTrigger: {
+		trigger: ".portal-stage",
+		start: "top top",
+		end: "+=1200",
+		scrub: true,
+		pin: true
+	}
 });
 
 portalTl
-  .set(morphTargets, { attr: { d: PATHS.portrait } })
-  .to(".next-world", {
-    opacity: 1,
-    scale: 1,
-    duration: 0.3
-  }, 0)
-  .to(["#portalShadow", "#portalGlow", "#portalRim"], {
-    opacity: 1,
-    duration: 0.25
-  }, 0)
-  .to(morphTargets, {
-    morphSVG: {
-      shape: PATHS.tiltDown,
-      type: "rotational"
-    },
-    duration: 0.5
-  }, 0.1)
-  .to(morphTargets, {
-    morphSVG: {
-      shape: PATHS.square,
-      type: "rotational"
-    },
-    duration: 0.7
-  }, 0.55);
+	.set(morphTargets, { attr: { d: PATHS.portrait } })
+	.to(
+		".next-world",
+		{
+			opacity: 1,
+			scale: 1,
+			duration: 0.3
+		},
+		0
+	)
+	.to(
+		["#portalShadow", "#portalGlow", "#portalRim"],
+		{
+			opacity: 1,
+			duration: 0.25
+		},
+		0
+	)
+	.to(
+		morphTargets,
+		{
+			morphSVG: {
+				shape: PATHS.tiltDown,
+				type: "rotational"
+			},
+			duration: 0.5
+		},
+		0.1
+	)
+	.to(
+		morphTargets,
+		{
+			morphSVG: {
+				shape: PATHS.square,
+				type: "rotational"
+			},
+			duration: 0.7
+		},
+		0.55
+	);
 ```
 
 ---
@@ -424,34 +452,25 @@ portal 邊緣有 feather
 基本概念：
 
 ```html
-<svg
-  class="portal-mask-svg"
-  viewBox="0 0 533 806"
-  preserveAspectRatio="none"
->
-  <defs>
-    <filter id="portalFeather">
-      <feGaussianBlur stdDeviation="8" />
-    </filter>
+<svg class="portal-mask-svg" viewBox="0 0 533 806" preserveAspectRatio="none">
+	<defs>
+		<filter id="portalFeather">
+			<feGaussianBlur stdDeviation="8" />
+		</filter>
 
-    <mask id="portalMask" maskUnits="userSpaceOnUse">
-      <rect width="533" height="806" fill="black" />
+		<mask id="portalMask" maskUnits="userSpaceOnUse">
+			<rect width="533" height="806" fill="black" />
 
-      <!-- 白色區域代表可見區域 -->
-      <path
-        id="portalMaskPath"
-        d=""
-        fill="white"
-        filter="url(#portalFeather)"
-      />
-    </mask>
-  </defs>
+			<!-- 白色區域代表可見區域 -->
+			<path id="portalMaskPath" d="" fill="white" filter="url(#portalFeather)" />
+		</mask>
+	</defs>
 
-  <foreignObject width="533" height="806" mask="url(#portalMask)">
-    <div xmlns="http://www.w3.org/1999/xhtml" class="next-world-inner">
-      <!-- 下一個世界內容 -->
-    </div>
-  </foreignObject>
+	<foreignObject width="533" height="806" mask="url(#portalMask)">
+		<div xmlns="http://www.w3.org/1999/xhtml" class="next-world-inner">
+			<!-- 下一個世界內容 -->
+		</div>
+	</foreignObject>
 </svg>
 ```
 
@@ -459,12 +478,12 @@ portal 邊緣有 feather
 
 ```js
 gsap.to("#portalMaskPath", {
-  duration: 1,
-  morphSVG: {
-    shape: PATHS.tiltDown,
-    type: "rotational"
-  },
-  ease: "power3.inOut"
+	duration: 1,
+	morphSVG: {
+		shape: PATHS.tiltDown,
+		type: "rotational"
+	},
+	ease: "power3.inOut"
 });
 ```
 
@@ -479,10 +498,10 @@ gsap.to("#portalMaskPath", {
 
 ```css
 .next-world {
-  mask-image: url("/mask-portrait.svg");
-  mask-size: 100% 100%;
-  mask-repeat: no-repeat;
-  mask-position: center;
+	mask-image: url("/mask-portrait.svg");
+	mask-size: 100% 100%;
+	mask-repeat: no-repeat;
+	mask-position: center;
 }
 ```
 
@@ -510,7 +529,7 @@ GSAP morph path d
 
 ```css
 .next-world {
-  transform: rotateX(60deg);
+	transform: rotateX(60deg);
 }
 ```
 
@@ -538,30 +557,39 @@ gsap.registerPlugin(MorphSVGPlugin);
 const targets = ["#portalClipPath", "#portalRim", "#portalGlow", "#portalShadow"];
 
 gsap.set(targets, {
-  attr: { d: PATHS.portrait }
+	attr: { d: PATHS.portrait }
 });
 
-gsap.timeline()
-  .to(".next-world", {
-    opacity: 1,
-    duration: 0.4
-  }, 0)
-  .to(targets, {
-    morphSVG: {
-      shape: PATHS.tiltDown,
-      type: "rotational"
-    },
-    duration: 0.8,
-    ease: "power3.inOut"
-  }, 0)
-  .to(targets, {
-    morphSVG: {
-      shape: PATHS.square,
-      type: "rotational"
-    },
-    duration: 0.8,
-    ease: "power3.inOut"
-  });
+gsap
+	.timeline()
+	.to(
+		".next-world",
+		{
+			opacity: 1,
+			duration: 0.4
+		},
+		0
+	)
+	.to(
+		targets,
+		{
+			morphSVG: {
+				shape: PATHS.tiltDown,
+				type: "rotational"
+			},
+			duration: 0.8,
+			ease: "power3.inOut"
+		},
+		0
+	)
+	.to(targets, {
+		morphSVG: {
+			shape: PATHS.square,
+			type: "rotational"
+		},
+		duration: 0.8,
+		ease: "power3.inOut"
+	});
 ```
 
 這樣就能做到：
