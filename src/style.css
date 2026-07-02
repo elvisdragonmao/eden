@@ -452,7 +452,7 @@ button {
 .about-title-small {
 	display: inline-block;
 	font-size: 0.68em;
-	margin-inline: -0.12em;
+	margin-inline: 0.08em;
 	position: relative;
 	top: -0.04em;
 }
