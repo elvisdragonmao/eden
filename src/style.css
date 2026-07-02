@@ -1323,42 +1323,37 @@ button {
 
 	.gallery-marquee {
 		top: 293px;
-		left: 45px;
-		width: calc(100vw - 90px);
+		left: 23px;
+		width: calc(100vw - 46px);
 		overflow: visible;
 		transform: none;
 	}
 
 	.gallery-track {
-		display: flex;
-		width: max-content;
-		align-items: start;
-		gap: 21px 20px;
+		display: block;
+		width: 100%;
+		column-count: 3;
+		column-gap: 14px;
 		transform: none !important;
 	}
 
-	.gallery-track [data-clone="true"] {
-		display: none;
+	.gallery-track > .gallery-card[data-clone="true"] {
+		display: none !important;
 	}
 
 	.gallery-card,
 	.gallery-card.is-narrow,
 	.gallery-card.is-wide {
-		width: auto;
-		height: var(--gallery-card-height);
-		border-radius: 29px;
-	}
-
-	.gallery-card:nth-child(even) {
-		transform: translateY(37px);
+		display: block;
+		width: 100%;
+		height: auto;
+		margin: 0 0 14px;
+		break-inside: avoid;
+		border-radius: 22px;
 	}
 
 	.gallery-card:hover {
-		transform: translateY(-4px);
-	}
-
-	.gallery-card:nth-child(even):hover {
-		transform: translateY(33px);
+		transform: translateY(-4px) scale(1.02);
 	}
 
 	.site-credit {
