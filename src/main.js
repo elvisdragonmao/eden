@@ -337,11 +337,11 @@ function exitCoverPortalRect() {
 	};
 }
 
-function galleryTransitionSquareRect() {
+function galleryTransitionCardRect() {
 	const card = document.querySelector(".gallery-card.is-transition");
 	const section = document.querySelector(".gallery-section");
 	const track = document.querySelector(".gallery-track");
-	if (!card) return { left: window.innerWidth * 0.55, top: window.innerHeight * 0.52, width: 296, height: 296 };
+	if (!card) return { left: window.innerWidth * 0.55, top: window.innerHeight * 0.52, width: 201, height: 296 };
 
 	const previousSectionTransform = section?.style.transform;
 	const previousTrackTransform = track?.style.transform;
@@ -357,12 +357,11 @@ function galleryTransitionSquareRect() {
 	if (track) track.style.transform = previousTrackTransform || "";
 	card.style.transform = previousCardTransform;
 
-	const size = Math.min(rect.width, rect.height);
 	return {
-		left: rect.left + (rect.width - size) / 2,
-		top: rect.top + (rect.height - size) / 2,
-		width: size,
-		height: size
+		left: rect.left,
+		top: rect.top,
+		width: rect.width,
+		height: rect.height
 	};
 }
 
@@ -375,22 +374,31 @@ function galleryTransitionRadius() {
 
 function commissionExitSourceRect() {
 	const head = baseRect(document.querySelector(".commission-head:not(.commission-portal-head)"));
-	const fallbackSize = Math.min(window.innerWidth, window.innerHeight) * 0.74;
-	const size = head ? Math.min(head.width * 1.03, Math.min(window.innerWidth, window.innerHeight) * 0.86) : fallbackSize;
+	const target = galleryTransitionCardRect();
+	const aspect = target.width / target.height || 1;
+	const fallbackHeight = Math.min(window.innerWidth, window.innerHeight) * 0.86;
+	let height = head ? Math.min(head.height * 1.03, window.innerHeight * 0.9) : fallbackHeight;
+	let width = height * aspect;
+
+	if (width > window.innerWidth * 0.86) {
+		width = window.innerWidth * 0.86;
+		height = width / aspect;
+	}
+
 	const cx = head ? head.left + head.width / 2 : window.innerWidth / 2;
 	const cy = head ? head.top + head.height / 2 : window.innerHeight / 2;
 
 	return {
-		left: clamp(cx - size / 2, 0, window.innerWidth - size),
-		top: clamp(cy - size / 2, 0, window.innerHeight - size),
-		width: size,
-		height: size
+		left: clamp(cx - width / 2, 0, window.innerWidth - width),
+		top: clamp(cy - height / 2, 0, window.innerHeight - height),
+		width,
+		height
 	};
 }
 
 function commissionExitClipPath() {
 	const from = commissionExitSourceRect();
-	const to = galleryTransitionSquareRect();
+	const to = galleryTransitionCardRect();
 	const right = window.innerWidth - from.left - from.width;
 	const bottom = window.innerHeight - from.top - from.height;
 	const radius = galleryTransitionRadius() / (to.width / from.width);
@@ -401,7 +409,7 @@ function commissionExitClipPath() {
 function commissionExitTransform(axis) {
 	return () => {
 		const from = commissionExitSourceRect();
-		const to = galleryTransitionSquareRect();
+		const to = galleryTransitionCardRect();
 		const scale = to.width / from.width;
 
 		if (axis === "scale") return scale;
@@ -494,9 +502,11 @@ function initStoryTimeline() {
 			const commissionRevealSettledAt = 0.56;
 			const commissionTextIn = commissionFrontEdgeAt + (commissionBackSettledAt - commissionFrontEdgeAt) * 0.5;
 			const galleryExitStart = commissionRevealSettledAt + 0.035;
+			const galleryPrepAt = galleryExitStart - 0.006;
 			const galleryExitDuration = 0.155;
 			const galleryExitEnd = galleryExitStart + galleryExitDuration;
 			const galleryClearAt = galleryExitEnd + 0.001;
+			const storyEndAt = galleryClearAt;
 			const coverScaleProgress = { value: 0 };
 			const coverSceneScaleEase = gsap.parseEase("power2.out");
 			const coverVisualScaleEase = gsap.parseEase("power2.out");
@@ -588,11 +598,13 @@ function initStoryTimeline() {
 					scrub: storyScrub,
 					invalidateOnRefresh: true,
 					onUpdate: self => {
-						setThemeByProgress(self.progress);
-						syncCoverParallaxProgress(self.progress);
-						setGalleryMarqueeActive((self.animation?.progress() || self.progress) > galleryExitEnd);
+						const timelineTime = self.animation?.time() ?? self.progress * storyEndAt;
 
-						const isCoverActive = self.progress < 0.035;
+						setThemeByProgress(timelineTime);
+						syncCoverParallaxProgress(timelineTime);
+						setGalleryMarqueeActive(timelineTime >= galleryExitEnd);
+
+						const isCoverActive = timelineTime < 0.035;
 						if (isCoverActive && !coverWasActive) playInkSweep();
 						if (!isCoverActive) coverScene?.classList.add("is-ink-complete");
 						coverWasActive = isCoverActive;
@@ -600,7 +612,7 @@ function initStoryTimeline() {
 				}
 			});
 
-			tl.to({}, { duration: 1 }, 0);
+			tl.to({}, { duration: storyEndAt }, 0);
 			tl.set(".about-section", { autoAlpha: 1 }, aboutIn);
 			tl.to(
 				".cover-scene",
@@ -699,14 +711,14 @@ function initStoryTimeline() {
 			tl.to(".commission-portal-copy", { autoAlpha: 1, y: 0, duration: commissionRevealSettledAt - commissionTextIn, ease: "power2.out" }, commissionTextIn);
 			tl.to(".commission-portal", { clipPath: portalFlatClip, duration: commissionRevealSettledAt - commissionBackSettledAt, ease: "power2.out" }, commissionBackSettledAt);
 			tl.set(".commission-bg, .commission-head:not(.commission-portal-head)", { autoAlpha: 1 }, commissionRevealSettledAt);
-			tl.set(".commission-copy", { autoAlpha: 1, y: 0 }, commissionRevealSettledAt);
-			tl.set(".commission-portal", { autoAlpha: 0 }, commissionRevealSettledAt);
+			tl.set(".commission-copy", { autoAlpha: 0, y: 0 }, commissionRevealSettledAt);
 			tl.set(".about-section", { autoAlpha: 0 }, commissionRevealSettledAt);
 			tl.set(".commission-copy", { clearProps: "transform,willChange" }, commissionRevealSettledAt + 0.13);
-			tl.set(".gallery-section", { y: 0 }, galleryExitStart);
+			tl.set(".gallery-section", { y: 0 }, galleryPrepAt);
+			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, galleryPrepAt);
 			tl.set(".gallery-section", { clearProps: "transform" }, galleryClearAt);
 			tl.set(".gallery-section h2, .gallery-intro", { clearProps: "transform,willChange" }, galleryClearAt);
-			tl.to(".commission-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, galleryExitStart);
+			tl.to(".commission-copy, .commission-portal-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, galleryExitStart);
 			tl.to(
 				".commission-section",
 				{
@@ -719,7 +731,7 @@ function initStoryTimeline() {
 				},
 				galleryExitStart
 			);
-			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, galleryExitEnd);
+			tl.set(".commission-portal", { autoAlpha: 0 }, galleryExitEnd);
 			tl.set(".commission-section", { autoAlpha: 0 }, galleryExitEnd);
 			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, galleryClearAt);
 
