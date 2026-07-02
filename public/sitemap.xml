@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+	<url>
+		<loc>https://eden.emtech.cc/</loc>
+		<lastmod>2026-07-02</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/og-image.webp</image:loc>
+			<image:title>伊甸網站預覽圖</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/head.webp</image:loc>
+			<image:title>高飽和頭像</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/slow.webp</image:loc>
+			<image:title>名片插圖</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/feier.webp</image:loc>
+			<image:title>吃午餐順手搶到的掉落</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/nullma.webp</image:loc>
+			<image:title>Nullma</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/orion.webp</image:loc>
+			<image:title>交換（舊設定）</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/xiaoyu.webp</image:loc>
+			<image:title>贈圖（舊設定）</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/fursona.webp</image:loc>
+			<image:title>高中時畫的醜醜的設定</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/birthday-2024.webp</image:loc>
+			<image:title>2024 生日自繪</image:title>
+		</image:image>
+	</url>
+</urlset>
