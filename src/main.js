@@ -17,6 +17,7 @@ const siteCredit = document.querySelector(".site-credit");
 const lightbox = document.querySelector(".lightbox");
 const lightboxStage = document.querySelector(".lightbox-stage");
 const lightboxImage = document.querySelector(".lightbox-image");
+const lightboxBar = document.querySelector(".lightbox-bar");
 const lightboxCaption = document.querySelector(".lightbox-caption p");
 const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
@@ -965,52 +966,309 @@ function initLightbox() {
 	let zoom = 1;
 	let offsetX = 0;
 	let offsetY = 0;
+	let targetRect = null;
+	let activeSource = null;
+	let sourceRadius = 0;
+	let isOpen = false;
+	let isAnimating = false;
 	let dragStart = null;
-	let movedDuringDrag = false;
+	let pinchStart = null;
+	let movedDuringGesture = false;
+	let suppressImageClick = false;
+	const activePointers = new Map();
+	const minZoom = 1;
+	const maxZoom = 6;
+	const zoomStep = 1.48;
 
-	const applyTransform = () => {
-		lightboxImage.style.setProperty("--zoom", zoom.toFixed(3));
-		lightboxImage.style.setProperty("--lx", `${offsetX.toFixed(1)}px`);
-		lightboxImage.style.setProperty("--ly", `${offsetY.toFixed(1)}px`);
-		lightboxStage.classList.toggle("is-zoomed", zoom > 1);
+	const getSourceImage = card => card.querySelector("img") || card;
+
+	const readSourceState = card => {
+		const sourceImage = getSourceImage(card);
+		const rect = sourceImage.getBoundingClientRect();
+		const styles = getComputedStyle(sourceImage);
+		const radius = Number.parseFloat(styles.borderTopLeftRadius) || 0;
+		return { rect, radius };
 	};
 
-	const setZoom = nextZoom => {
-		zoom = clamp(nextZoom, 1, 4);
-		if (zoom === 1) {
+	const getLightboxTargetRect = aspect => {
+		const isMobile = window.matchMedia("(width <= 900px)").matches;
+		const pad = isMobile ? 16 : clamp(window.innerWidth * 0.04, 20, 48);
+		const barHeight = lightboxBar?.offsetHeight || 0;
+		const barGap = isMobile ? 18 : 24;
+		const availableWidth = Math.max(220, window.innerWidth - pad * 2);
+		const availableHeight = Math.max(220, window.innerHeight - pad * 2 - barHeight - barGap);
+		const maxWidth = Math.min(availableWidth, 1280);
+		const maxHeight = Math.min(availableHeight, 820);
+		const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1;
+		let width = maxWidth;
+		let height = width / safeAspect;
+
+		if (height > maxHeight) {
+			height = maxHeight;
+			width = height * safeAspect;
+		}
+
+		const topSpace = pad;
+		const bottomLimit = window.innerHeight - pad - barHeight - barGap;
+		const top = topSpace + (bottomLimit - topSpace - height) / 2;
+
+		return {
+			left: (window.innerWidth - width) / 2,
+			top: Math.max(pad, top),
+			width,
+			height
+		};
+	};
+
+	const clampOffsets = () => {
+		if (zoom <= minZoom || !targetRect) {
 			offsetX = 0;
 			offsetY = 0;
+			return;
 		}
+
+		const maxX = Math.max(90, (targetRect.width * zoom - targetRect.width) / 2 + targetRect.width * 0.35);
+		const maxY = Math.max(90, (targetRect.height * zoom - targetRect.height) / 2 + targetRect.height * 0.35);
+		offsetX = clamp(offsetX, -maxX, maxX);
+		offsetY = clamp(offsetY, -maxY, maxY);
+	};
+
+	const applyTransform = (duration = 0) => {
+		clampOffsets();
+		lightboxStage.classList.toggle("is-zoomed", zoom > 1);
+
+		const vars = {
+			x: offsetX,
+			y: offsetY,
+			scale: zoom,
+			transformOrigin: "50% 50%"
+		};
+
+		if (duration > 0) {
+			gsap.to(lightboxImage, {
+				...vars,
+				duration,
+				ease: "power3.out",
+				overwrite: "auto"
+			});
+			return;
+		}
+
+		gsap.set(lightboxImage, vars);
+	};
+
+	const zoomAt = (clientX, clientY, nextZoom, duration = 0.18) => {
+		if (!targetRect) return;
+
+		const centerX = targetRect.left + targetRect.width / 2;
+		const centerY = targetRect.top + targetRect.height / 2;
+		const localX = (clientX - centerX - offsetX) / zoom;
+		const localY = (clientY - centerY - offsetY) / zoom;
+		zoom = clamp(nextZoom, minZoom, maxZoom);
+
+		if (zoom <= minZoom + 0.001) {
+			zoom = minZoom;
+			offsetX = 0;
+			offsetY = 0;
+		} else {
+			offsetX = clientX - centerX - localX * zoom;
+			offsetY = clientY - centerY - localY * zoom;
+		}
+
+		applyTransform(duration);
+	};
+
+	const setZoom = (nextZoom, duration = 0.18) => {
+		if (!targetRect) return;
+		zoomAt(targetRect.left + targetRect.width / 2, targetRect.top + targetRect.height / 2, nextZoom, duration);
+	};
+
+	const resetGesture = () => {
+		activePointers.clear();
+		dragStart = null;
+		pinchStart = null;
+		lightboxStage.classList.remove("is-dragging");
+	};
+
+	const getPinchState = () => {
+		const points = Array.from(activePointers.values());
+		if (points.length < 2) return null;
+
+		const [first, second] = points;
+		const dx = second.x - first.x;
+		const dy = second.y - first.y;
+		const distance = Math.hypot(dx, dy) || 1;
+		const midpoint = {
+			x: (first.x + second.x) / 2,
+			y: (first.y + second.y) / 2
+		};
+
+		return { distance, midpoint };
+	};
+
+	const startPinch = () => {
+		const state = getPinchState();
+		if (!state || !targetRect) return;
+
+		const centerX = targetRect.left + targetRect.width / 2;
+		const centerY = targetRect.top + targetRect.height / 2;
+		pinchStart = {
+			...state,
+			zoom,
+			localX: (state.midpoint.x - centerX - offsetX) / zoom,
+			localY: (state.midpoint.y - centerY - offsetY) / zoom
+		};
+		dragStart = null;
+		lightboxStage.classList.add("is-dragging");
+	};
+
+	const updatePinch = () => {
+		const state = getPinchState();
+		if (!state || !pinchStart || !targetRect) return;
+
+		const centerX = targetRect.left + targetRect.width / 2;
+		const centerY = targetRect.top + targetRect.height / 2;
+		zoom = clamp(pinchStart.zoom * (state.distance / pinchStart.distance), minZoom, maxZoom);
+
+		if (zoom <= minZoom + 0.001) {
+			zoom = minZoom;
+			offsetX = 0;
+			offsetY = 0;
+		} else {
+			offsetX = state.midpoint.x - centerX - pinchStart.localX * zoom;
+			offsetY = state.midpoint.y - centerY - pinchStart.localY * zoom;
+		}
+
+		if (Math.abs(state.distance - pinchStart.distance) > 5) {
+			movedDuringGesture = true;
+			suppressImageClick = true;
+		}
+
+		applyTransform();
+	};
+
+	const syncTargetRect = () => {
+		if (!isOpen || !targetRect) return;
+		const aspect = targetRect.width / targetRect.height;
+		targetRect = getLightboxTargetRect(aspect);
+		gsap.set(lightboxImage, {
+			left: targetRect.left,
+			top: targetRect.top,
+			width: targetRect.width,
+			height: targetRect.height
+		});
 		applyTransform();
 	};
 
 	const open = card => {
+		if (isOpen || isAnimating) return;
+
 		const image = card.dataset.full;
 		const caption = card.dataset.caption || "";
 		const author = card.dataset.author || "";
 		const authorUrl = card.dataset.authorUrl || "#";
+		if (!image) return;
 
+		const source = readSourceState(card);
+		const aspect = source.rect.width / source.rect.height;
+
+		isOpen = true;
+		isAnimating = true;
+		activeSource = card;
+		sourceRadius = source.radius;
 		zoom = 1;
 		offsetX = 0;
 		offsetY = 0;
+		resetGesture();
+
 		lightboxImage.src = image;
-		lightboxImage.alt = caption;
+		lightboxImage.alt = caption || author;
 		lightboxCaption.textContent = caption;
-		lightboxAuthor.textContent = author ? `作者：${author}` : "";
+		lightboxAuthor.textContent = author;
 		lightboxAuthor.href = authorUrl;
-		applyTransform();
+		lightboxAuthor.hidden = !author;
+		lightboxCaption.hidden = !caption;
+		lightbox.querySelector(".lightbox-caption")?.classList.toggle("is-authorless", !author);
+		activeSource.classList.add("is-lightbox-source");
 
 		lightbox.setAttribute("aria-hidden", "false");
 		document.body.classList.add("is-lightbox-open");
+		galleryMarqueeTween?.pause();
+
+		targetRect = getLightboxTargetRect(aspect);
+		gsap.killTweensOf(lightboxImage);
+		gsap.set(lightboxImage, {
+			left: source.rect.left,
+			top: source.rect.top,
+			width: source.rect.width,
+			height: source.rect.height,
+			x: 0,
+			y: 0,
+			scale: 1,
+			opacity: 1,
+			borderRadius: source.radius,
+			objectFit: "cover"
+		});
+
+		gsap.to(lightboxImage, {
+			left: targetRect.left,
+			top: targetRect.top,
+			width: targetRect.width,
+			height: targetRect.height,
+			borderRadius: clamp(targetRect.width * 0.025, 18, 34),
+			duration: 0.46,
+			ease: "expo.out",
+			overwrite: true,
+			onComplete: () => {
+				gsap.set(lightboxImage, { objectFit: "contain" });
+				isAnimating = false;
+			}
+		});
+
 		lightboxClose?.focus();
 	};
 
 	const close = () => {
+		if (!isOpen || isAnimating) return;
+
+		isAnimating = true;
+		resetGesture();
+		zoom = 1;
+		offsetX = 0;
+		offsetY = 0;
+
+		const source = activeSource ? readSourceState(activeSource) : null;
 		lightbox.setAttribute("aria-hidden", "true");
 		document.body.classList.remove("is-lightbox-open");
+
+		gsap.killTweensOf(lightboxImage);
+		gsap.to(lightboxImage, {
+			left: source?.rect.left ?? window.innerWidth / 2,
+			top: source?.rect.top ?? window.innerHeight / 2,
+			width: source?.rect.width ?? 0,
+			height: source?.rect.height ?? 0,
+			x: 0,
+			y: 0,
+			scale: 1,
+			borderRadius: source?.radius ?? sourceRadius,
+			duration: source ? 0.34 : 0.2,
+			ease: "power3.inOut",
+			overwrite: true,
+			onComplete: () => {
+				activeSource?.classList.remove("is-lightbox-source");
+				activeSource = null;
+				targetRect = null;
+				isOpen = false;
+				isAnimating = false;
+				lightboxImage.removeAttribute("src");
+				gsap.set(lightboxImage, { clearProps: "all" });
+				if (galleryMarqueeActive) galleryMarqueeTween?.resume();
+			}
+		});
 	};
 
 	document.addEventListener("click", event => {
+		if (isOpen) return;
 		const card = event.target.closest(".gallery-card");
 		if (!card) return;
 		open(card);
@@ -1023,44 +1281,99 @@ function initLightbox() {
 	});
 
 	lightbox.querySelectorAll("[data-zoom]").forEach(button => {
-		button.addEventListener("click", () => {
+		button.addEventListener("click", event => {
+			event.stopPropagation();
 			const action = button.dataset.zoom;
-			if (action === "in") setZoom(zoom + 0.5);
-			if (action === "out") setZoom(zoom - 0.5);
+			if (action === "in") setZoom(zoom * zoomStep);
+			if (action === "out") setZoom(zoom / zoomStep);
 			if (action === "reset") setZoom(1);
 		});
 	});
 
-	lightboxStage.addEventListener("click", () => {
-		if (movedDuringDrag) {
-			movedDuringDrag = false;
+	lightbox.addEventListener("click", event => {
+		if (event.target === lightbox || event.target === lightboxStage) close();
+	});
+
+	lightboxImage.addEventListener("click", event => {
+		event.stopPropagation();
+
+		if (suppressImageClick || movedDuringGesture) {
+			suppressImageClick = false;
+			movedDuringGesture = false;
 			return;
 		}
-		setZoom(zoom > 1 ? 1 : 2);
+
+		zoomAt(event.clientX, event.clientY, zoom * zoomStep);
 	});
 
-	lightboxStage.addEventListener("pointerdown", event => {
-		if (zoom <= 1) return;
+	lightboxImage.addEventListener(
+		"wheel",
+		event => {
+			if (!isOpen || isAnimating) return;
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			if (event.ctrlKey || event.metaKey) {
+				const factor = Math.exp(-event.deltaY * 0.006);
+				zoomAt(event.clientX, event.clientY, zoom * factor, 0.08);
+				return;
+			}
+
+			if (zoom <= minZoom) return;
+
+			offsetX -= event.deltaX;
+			offsetY -= event.deltaY;
+			applyTransform(0.08);
+		},
+		{ passive: false }
+	);
+
+	lightboxImage.addEventListener("pointerdown", event => {
+		if (!isOpen || isAnimating) return;
 
 		event.preventDefault();
-		dragStart = {
-			pointerId: event.pointerId,
-			x: event.clientX,
-			y: event.clientY,
-			offsetX,
-			offsetY
-		};
-		movedDuringDrag = false;
-		lightboxStage.classList.add("is-dragging");
-		lightboxStage.setPointerCapture(event.pointerId);
+		event.stopPropagation();
+		activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+		lightboxImage.setPointerCapture(event.pointerId);
+		movedDuringGesture = false;
+
+		if (activePointers.size >= 2) {
+			startPinch();
+			return;
+		}
+
+		if (zoom > minZoom) {
+			dragStart = {
+				pointerId: event.pointerId,
+				x: event.clientX,
+				y: event.clientY,
+				offsetX,
+				offsetY
+			};
+			lightboxStage.classList.add("is-dragging");
+		}
 	});
 
-	lightboxStage.addEventListener("pointermove", event => {
-		if (!dragStart || dragStart.pointerId !== event.pointerId) return;
+	lightboxImage.addEventListener("pointermove", event => {
+		if (!activePointers.has(event.pointerId)) return;
+
+		event.preventDefault();
+		activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+		if (activePointers.size >= 2) {
+			updatePinch();
+			return;
+		}
+
+		if (!dragStart || dragStart.pointerId !== event.pointerId || zoom <= minZoom) return;
 
 		const dx = event.clientX - dragStart.x;
 		const dy = event.clientY - dragStart.y;
-		if (Math.abs(dx) + Math.abs(dy) > 4) movedDuringDrag = true;
+		if (Math.abs(dx) + Math.abs(dy) > 4) {
+			movedDuringGesture = true;
+			suppressImageClick = true;
+		}
 
 		offsetX = dragStart.offsetX + dx;
 		offsetY = dragStart.offsetY + dy;
@@ -1068,13 +1381,36 @@ function initLightbox() {
 	});
 
 	const endDrag = event => {
-		if (!dragStart || dragStart.pointerId !== event.pointerId) return;
+		if (!activePointers.has(event.pointerId)) return;
+
+		activePointers.delete(event.pointerId);
+
+		if (activePointers.size >= 2) {
+			startPinch();
+			return;
+		}
+
+		if (activePointers.size === 1 && zoom > minZoom) {
+			const [pointerId, point] = Array.from(activePointers.entries())[0];
+			dragStart = {
+				pointerId,
+				x: point.x,
+				y: point.y,
+				offsetX,
+				offsetY
+			};
+			pinchStart = null;
+			return;
+		}
+
 		dragStart = null;
+		pinchStart = null;
 		lightboxStage.classList.remove("is-dragging");
 	};
 
-	lightboxStage.addEventListener("pointerup", endDrag);
-	lightboxStage.addEventListener("pointercancel", endDrag);
+	lightboxImage.addEventListener("pointerup", endDrag);
+	lightboxImage.addEventListener("pointercancel", endDrag);
+	window.addEventListener("resize", syncTargetRect);
 	lightboxImage.draggable = false;
 }
 
