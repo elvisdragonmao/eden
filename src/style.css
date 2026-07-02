@@ -1257,11 +1257,11 @@ button {
 	}
 
 	.about-portrait {
-		top: 504px;
+		top: clamp(516px, 62svh, 524px);
 		left: 71px;
 		right: auto;
-		width: 261px;
-		height: 395px;
+		width: clamp(196px, 30.9svh, 261px);
+		height: clamp(296px, 46.8svh, 395px);
 	}
 
 	.commission-section {
