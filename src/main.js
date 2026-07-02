@@ -182,13 +182,19 @@ function syncMobileGalleryCredit() {
 
 	if (!window.matchMedia("(max-width: 900px)").matches) {
 		gallerySection.style.removeProperty("--mobile-gallery-credit-top");
+		storyScroll?.style.removeProperty("--mobile-gallery-scroll-extra");
 		return;
 	}
 
 	const sectionRect = gallerySection.getBoundingClientRect();
 	const marqueeRect = galleryMarquee.getBoundingClientRect();
-	const creditTop = Math.ceil(marqueeRect.bottom - sectionRect.top + gallerySection.scrollTop + 28);
+	const styles = getComputedStyle(gallerySection);
+	const cornerGap = Number.parseFloat(styles.getPropertyValue("--gallery-corner-gap")) || 0;
+	const creditTop = Math.ceil(marqueeRect.bottom - sectionRect.top + 28);
+	const scrollExtra = Math.max(0, Math.ceil(creditTop + siteCredit.offsetHeight + cornerGap - window.innerHeight));
+
 	gallerySection.style.setProperty("--mobile-gallery-credit-top", `${creditTop}px`);
+	storyScroll?.style.setProperty("--mobile-gallery-scroll-extra", `${scrollExtra}px`);
 }
 
 function syncResponsiveLayoutVars() {

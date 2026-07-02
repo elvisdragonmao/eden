@@ -1019,6 +1019,14 @@ button {
 		--frame-inset: 0px;
 	}
 
+	.story-scroll {
+		margin-bottom: var(--mobile-gallery-scroll-extra, 0px);
+	}
+
+	.story-stage {
+		overflow: visible;
+	}
+
 	.desktop-frame {
 		display: none;
 	}
@@ -1307,10 +1315,7 @@ button {
 		--gallery-social-offset: 0px;
 		--gallery-corner-gap: 25px;
 		--mobile-gallery-credit-top: 1112px;
-		overflow-x: hidden;
-		overflow-y: auto;
-		overscroll-behavior: contain;
-		-webkit-overflow-scrolling: touch;
+		overflow: visible;
 	}
 
 	.gallery-top-rule {
