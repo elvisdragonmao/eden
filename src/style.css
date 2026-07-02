@@ -754,7 +754,8 @@ button {
 
 .gallery-intro {
 	position: absolute;
-	bottom: var(--gallery-edge-gap);
+	top: calc(75svh + 104px);
+	bottom: auto;
 	left: calc(var(--gallery-edge-gap) + var(--gallery-social-offset));
 	z-index: 2;
 	display: grid;
@@ -762,6 +763,7 @@ button {
 	margin: 0;
 	font-size: clamp(21px, 1.6vw, 24px);
 	line-height: 1.2;
+	transform: translateY(-50%);
 }
 
 .site-credit {
@@ -802,6 +804,7 @@ button {
 	overflow: hidden;
 	padding: 0;
 	background: #d9d9d9;
+	border: 1px solid rgba(0, 0, 0, 0.08);
 	border-radius: 29px;
 	box-shadow: 0 0 0 rgba(0, 49, 99, 0);
 	transition:
@@ -871,6 +874,7 @@ button {
 .gallery-card img {
 	width: 100%;
 	height: 100%;
+	border-radius: inherit;
 	object-fit: cover;
 	transition:
 		filter 0.45s ease,
@@ -1020,8 +1024,8 @@ button {
 
 	.menu-toggle {
 		position: fixed;
-		top: 18px;
-		left: 18px;
+		top: calc(env(safe-area-inset-top, 0px) + 18px);
+		left: calc(env(safe-area-inset-left, 0px) + 18px);
 		z-index: 100;
 		display: grid;
 		width: 56px;
@@ -1036,6 +1040,7 @@ button {
 			inset 0 1px 0 rgba(255, 255, 255, 0.72);
 		backdrop-filter: blur(16px);
 		mix-blend-mode: normal;
+		transform: translate3d(0, 0, 0);
 		transition:
 			background 0.35s ease,
 			border-color 0.35s ease,
@@ -1046,7 +1051,7 @@ button {
 
 	.menu-toggle::before {
 		position: absolute;
-		inset: 8px;
+		inset: 11px;
 		content: "";
 		border: 1px solid rgba(0, 49, 99, 0.1);
 		border-radius: inherit;
@@ -1270,6 +1275,7 @@ button {
 	.commission-portal-copy {
 		top: 126px;
 		left: 23px;
+		z-index: 4;
 		max-width: 384px;
 		color: #000;
 	}
@@ -1286,17 +1292,23 @@ button {
 	}
 
 	.commission-head {
-		top: 56%;
-		width: min(128vw, 540px);
+		top: 62%;
+		z-index: 2;
+		width: min(98vw, 410px);
 		transform: translate(-50%, -50%) translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0);
 	}
 
 	.gallery-section {
-		min-height: 966px;
+		min-height: 100svh;
 		--gallery-card-height: 146px;
 		--gallery-edge-gap: 45px;
 		--gallery-social-offset: 0px;
 		--gallery-corner-gap: 25px;
+		--mobile-gallery-credit-top: 1112px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.gallery-top-rule {
@@ -1322,6 +1334,7 @@ button {
 		width: auto;
 		font-size: clamp(18px, 5.2vw, 22px);
 		line-height: 1.15;
+		transform: none;
 	}
 
 	.gallery-intro span:first-child {
@@ -1364,8 +1377,9 @@ button {
 	}
 
 	.site-credit {
+		top: var(--mobile-gallery-credit-top);
 		right: var(--gallery-corner-gap);
-		bottom: var(--gallery-corner-gap);
+		bottom: auto;
 		left: auto;
 		width: auto;
 		font-size: 16px;

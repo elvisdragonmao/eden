@@ -10,7 +10,10 @@ const menuToggle = document.querySelector(".menu-toggle");
 const drawer = document.querySelector(".mobile-drawer");
 const storyScroll = document.querySelector(".story-scroll");
 const coverScene = document.querySelector(".cover-scene");
+const gallerySection = document.querySelector(".gallery-section");
+const galleryMarquee = document.querySelector(".gallery-marquee");
 const galleryTrack = document.querySelector(".gallery-track");
+const siteCredit = document.querySelector(".site-credit");
 const lightbox = document.querySelector(".lightbox");
 const lightboxStage = document.querySelector(".lightbox-stage");
 const lightboxImage = document.querySelector(".lightbox-image");
@@ -19,6 +22,9 @@ const lightboxAuthor = document.querySelector(".lightbox-caption a");
 const lightboxClose = document.querySelector(".lightbox-close");
 let galleryMarqueeTween;
 let galleryMarqueeActive = false;
+let storyMatchMedia;
+let resizeRefreshTimer;
+let lastLayoutWidth = window.innerWidth;
 let syncCoverParallaxProgress = () => {};
 const coverMaskAspect = 533 / 806;
 const portalMaskAspect = 533 / 806;
@@ -169,6 +175,25 @@ function syncCoverBackgroundScale() {
 
 	document.documentElement.style.setProperty("--cover-bg-scale", scale.toFixed(4));
 	document.documentElement.style.setProperty("--commission-bg-scale", commissionScale.toFixed(4));
+}
+
+function syncMobileGalleryCredit() {
+	if (!gallerySection || !galleryMarquee || !siteCredit) return;
+
+	if (!window.matchMedia("(max-width: 900px)").matches) {
+		gallerySection.style.removeProperty("--mobile-gallery-credit-top");
+		return;
+	}
+
+	const sectionRect = gallerySection.getBoundingClientRect();
+	const marqueeRect = galleryMarquee.getBoundingClientRect();
+	const creditTop = Math.ceil(marqueeRect.bottom - sectionRect.top + gallerySection.scrollTop + 28);
+	gallerySection.style.setProperty("--mobile-gallery-credit-top", `${creditTop}px`);
+}
+
+function syncResponsiveLayoutVars() {
+	syncCoverBackgroundScale();
+	syncMobileGalleryCredit();
 }
 
 function resetCoverAvatarLayout() {
@@ -479,7 +504,9 @@ function setGalleryMarqueeActive(isActive) {
 function initStoryTimeline() {
 	if (!storyScroll) return;
 
+	storyMatchMedia?.revert();
 	const mm = gsap.matchMedia();
+	storyMatchMedia = mm;
 
 	mm.add(
 		{
@@ -748,6 +775,42 @@ function initStoryTimeline() {
 	);
 }
 
+function refreshResponsiveStoryLayout() {
+	syncResponsiveLayoutVars();
+
+	const nextWidth = window.innerWidth;
+	const widthChanged = Math.abs(nextWidth - lastLayoutWidth) > 1;
+
+	if (!widthChanged) {
+		ScrollTrigger.refresh();
+		return;
+	}
+
+	lastLayoutWidth = nextWidth;
+
+	if (prefersReducedMotion) {
+		initReducedStory();
+		return;
+	}
+
+	const previousProgress = ScrollTrigger.getById("story")?.progress || 0;
+	initStoryTimeline();
+	ScrollTrigger.refresh();
+
+	requestAnimationFrame(() => {
+		const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+		window.scrollTo({ top: maxScroll * previousProgress, left: 0, behavior: "auto" });
+		syncResponsiveLayoutVars();
+		ScrollTrigger.update();
+	});
+}
+
+function handleViewportResize() {
+	syncResponsiveLayoutVars();
+	window.clearTimeout(resizeRefreshTimer);
+	resizeRefreshTimer = window.setTimeout(refreshResponsiveStoryLayout, 180);
+}
+
 function initReducedStory() {
 	setChromeTheme("cover");
 	const initialCoverScale = coverStartScale();
@@ -950,8 +1013,8 @@ function initLightbox() {
 	lightboxImage.draggable = false;
 }
 
-syncCoverBackgroundScale();
-window.addEventListener("resize", syncCoverBackgroundScale);
+syncResponsiveLayoutVars();
+window.addEventListener("resize", handleViewportResize);
 
 if (!prefersReducedMotion) {
 	initInkSweep();
@@ -966,6 +1029,7 @@ initMenu();
 initLightbox();
 
 window.addEventListener("load", () => {
+	syncResponsiveLayoutVars();
 	ScrollTrigger.refresh();
 
 	if (window.location.hash) {
