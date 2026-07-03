@@ -13,6 +13,7 @@ const coverScene = document.querySelector(".cover-scene");
 const gallerySection = document.querySelector(".gallery-section");
 const galleryMarquee = document.querySelector(".gallery-marquee");
 const galleryTrack = document.querySelector(".gallery-track");
+const galleryRules = document.querySelector(".gallery-rules");
 const siteCredit = document.querySelector(".site-credit");
 const lightbox = document.querySelector(".lightbox");
 const lightboxStage = document.querySelector(".lightbox-stage");
@@ -34,7 +35,7 @@ const portalTurnClip = "polygon(48.6% 4%, 52.4% 0%, 53.2% 100%, 49.1% 96%)";
 const portalMidTurnClip = "polygon(17% -8%, 82% -12%, 87% 112%, 21% 106%)";
 const portalFlatClip = "polygon(-12% -12%, 112% -12%, 112% 112%, -12% 112%)";
 const storyScrub = 0.24;
-const readableTextSelector = ".cover-title, .scroll-cue, .about-title, .about-copy, .commission-copy, .gallery-section h2, .gallery-intro";
+const readableTextSelector = ".cover-title, .scroll-cue, .about-title, .about-copy, .commission-copy, .gallery-section h2, .gallery-intro, .gallery-rules";
 const criticalAssetUrls = [
 	"/img/cover-avatar.webp",
 	"/img/cover-bg.webp",
@@ -190,9 +191,10 @@ function syncCoverBackgroundScale() {
 }
 
 function syncMobileGalleryCredit() {
-	if (!gallerySection || !galleryMarquee || !siteCredit) return;
+	if (!gallerySection || !galleryMarquee || !galleryRules || !siteCredit) return;
 
 	if (!window.matchMedia("(max-width: 900px)").matches) {
+		gallerySection.style.removeProperty("--mobile-gallery-rules-top");
 		gallerySection.style.removeProperty("--mobile-gallery-credit-top");
 		storyScroll?.style.removeProperty("--mobile-gallery-scroll-extra");
 		return;
@@ -202,9 +204,11 @@ function syncMobileGalleryCredit() {
 	const marqueeRect = galleryMarquee.getBoundingClientRect();
 	const styles = getComputedStyle(gallerySection);
 	const cornerGap = Number.parseFloat(styles.getPropertyValue("--gallery-corner-gap")) || 0;
-	const creditTop = Math.ceil(marqueeRect.bottom - sectionRect.top + 28);
+	const rulesTop = Math.ceil(marqueeRect.bottom - sectionRect.top + 28);
+	const creditTop = Math.ceil(rulesTop + galleryRules.offsetHeight + 20);
 	const scrollExtra = Math.max(0, Math.ceil(creditTop + siteCredit.offsetHeight + cornerGap - window.innerHeight));
 
+	gallerySection.style.setProperty("--mobile-gallery-rules-top", `${rulesTop}px`);
 	gallerySection.style.setProperty("--mobile-gallery-credit-top", `${creditTop}px`);
 	storyScroll?.style.setProperty("--mobile-gallery-scroll-extra", `${scrollExtra}px`);
 }
@@ -544,7 +548,7 @@ function setThemeByProgress(progress) {
 		return;
 	}
 
-	if (progress < 0.75) {
+	if (progress < 0.59) {
 		setChromeTheme("light");
 		return;
 	}
@@ -600,6 +604,11 @@ function initStoryTimeline() {
 			const galleryExitEnd = galleryExitStart + galleryExitDuration;
 			const galleryClearAt = galleryExitEnd + 0.001;
 			const storyEndAt = galleryClearAt;
+			const syncChromeThemeFromScrollPosition = () => {
+				const scrollRange = Math.max(1, storyScroll.offsetHeight - window.innerHeight);
+				const scrollProgress = clamp((window.scrollY - storyScroll.offsetTop) / scrollRange, 0, 1);
+				setThemeByProgress(scrollProgress * storyEndAt);
+			};
 			const coverScaleProgress = { value: 0 };
 			const coverSceneScaleEase = gsap.parseEase("power2.out");
 			const coverVisualScaleEase = gsap.parseEase("power2.out");
@@ -614,6 +623,7 @@ function initStoryTimeline() {
 				gsap.set(".cover-scene", { scale: sceneScale });
 				gsap.set(".cover-content", { scale: visualScale / sceneScale });
 			};
+			window.addEventListener("scroll", syncChromeThemeFromScrollPosition, { passive: true });
 
 			resetCoverAvatarLayout();
 			gsap.set(".cover-section", { autoAlpha: 1 });
@@ -671,7 +681,7 @@ function initStoryTimeline() {
 			gsap.set(".commission-portal-world", { autoAlpha: 1 });
 			gsap.set(".commission-portal-bg", { scale: 1.2, transformOrigin: "50% 50%" });
 			gsap.set(".gallery-section", { autoAlpha: 1, y: "138vh" });
-			gsap.set(".gallery-section h2, .gallery-intro", { autoAlpha: 1, clearProps: "transform,willChange" });
+			gsap.set(".gallery-section h2, .gallery-intro, .gallery-rules", { autoAlpha: 1, clearProps: "transform,willChange" });
 			gsap.set(".gallery-card", { autoAlpha: 1, y: 0 });
 			gsap.set(".gallery-card.is-transition", {
 				autoAlpha: 0,
@@ -815,7 +825,7 @@ function initStoryTimeline() {
 			tl.set(".gallery-section", { y: 0 }, galleryPrepAt);
 			tl.set(".gallery-card.is-transition", { autoAlpha: 1, rotateY: 0, scale: 1 }, galleryPrepAt);
 			tl.set(".gallery-section", { clearProps: "transform" }, galleryClearAt);
-			tl.set(".gallery-section h2, .gallery-intro", { clearProps: "transform,willChange" }, galleryClearAt);
+			tl.set(".gallery-section h2, .gallery-intro, .gallery-rules", { clearProps: "transform,willChange" }, galleryClearAt);
 			tl.to(".commission-copy, .commission-portal-copy", { autoAlpha: 0, y: -28, duration: 0.09, ease: "power1.out" }, galleryExitStart);
 			tl.to(
 				".commission-section",
@@ -834,9 +844,13 @@ function initStoryTimeline() {
 			tl.set(".gallery-card.is-transition", { clearProps: "transform" }, galleryClearAt);
 			tl.set(".commission-section, .commission-copy", { clearProps: "transform,willChange" }, galleryClearAt);
 
-			setThemeByProgress(ScrollTrigger.getById("story")?.progress || 0);
+			syncChromeThemeFromScrollPosition();
 			clearReadableTextTransforms(".cover-title, .scroll-cue");
 			playInkSweep();
+
+			return () => {
+				window.removeEventListener("scroll", syncChromeThemeFromScrollPosition);
+			};
 		}
 	);
 }

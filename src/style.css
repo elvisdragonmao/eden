@@ -423,17 +423,18 @@ body.is-ready .site-loader {
 .cover-avatar-color {
 	filter: saturate(1.05);
 	mask-image: url("/img/mask/inkmask.png");
+	mask-mode: alpha;
 	mask-repeat: no-repeat;
 	mask-size: auto 100%;
-	mask-position: 100% 50%;
+	mask-position: 0% 50%;
 	-webkit-mask-image: url("/img/mask/inkmask.png");
 	-webkit-mask-repeat: no-repeat;
 	-webkit-mask-size: auto 100%;
-	-webkit-mask-position: 100% 50%;
+	-webkit-mask-position: 0% 50%;
 }
 
 .cover-scene.is-ink-playing .cover-avatar-color {
-	animation: ink-sweep 2.45s steps(48, end) forwards;
+	animation: ink-sweep 1.63s steps(22, end) forwards;
 }
 
 .cover-scene.is-ink-complete .cover-avatar-color {
@@ -854,6 +855,33 @@ body.is-ready .site-loader {
 	transform: translateY(-50%);
 }
 
+.gallery-rules {
+	position: absolute;
+	top: calc(75svh + 104px);
+	right: calc(var(--gallery-edge-gap) + var(--gallery-social-offset));
+	z-index: 2;
+	display: grid;
+	gap: 0.05em;
+	margin: 0;
+	font-size: clamp(21px, 1.6vw, 24px);
+	line-height: 1.2;
+	text-align: right;
+	transform: translateY(-50%);
+}
+
+.gallery-rule-row {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.82em;
+}
+
+.gallery-rule-item {
+	display: inline-flex;
+	gap: 0.18em;
+	align-items: baseline;
+	white-space: nowrap;
+}
+
 .site-credit {
 	position: absolute;
 	right: var(--gallery-corner-gap);
@@ -1131,13 +1159,13 @@ body.is-ready .site-loader {
 
 @keyframes ink-sweep {
 	from {
-		mask-position: 100% 50%;
-		-webkit-mask-position: 100% 50%;
+		mask-position: 0% 50%;
+		-webkit-mask-position: 0% 50%;
 	}
 
 	to {
-		mask-position: 0% 50%;
-		-webkit-mask-position: 0% 50%;
+		mask-position: 100% 50%;
+		-webkit-mask-position: 100% 50%;
 	}
 }
 
@@ -1473,6 +1501,22 @@ body.is-ready .site-loader {
 
 	.gallery-intro span:first-child {
 		white-space: nowrap;
+	}
+
+	.gallery-rules {
+		top: var(--mobile-gallery-rules-top);
+		right: 31px;
+		left: 31px;
+		width: auto;
+		font-size: clamp(18px, 5.2vw, 22px);
+		line-height: 1.18;
+		text-align: left;
+		transform: none;
+	}
+
+	.gallery-rule-row {
+		justify-content: flex-start;
+		gap: 0.82em;
 	}
 
 	.gallery-marquee {
