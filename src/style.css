@@ -896,11 +896,13 @@ body.is-ready .site-loader {
 .gallery-marquee {
 	position: absolute;
 	top: calc(50% + 60px);
-	left: 50%;
+	right: var(--frame-inset);
+	left: calc(var(--frame-inset) + 48px + var(--chrome-width));
 	z-index: 2;
-	width: min(100vw, 1134px);
-	overflow: visible;
-	transform: translate(-50%, -50%);
+	width: auto;
+	overflow: hidden;
+	padding-block: 44px;
+	transform: translateY(-50%);
 }
 
 .gallery-track {
