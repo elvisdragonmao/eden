@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 	<url>
 		<loc>https://eden.emtech.cc/</loc>
-		<lastmod>2026-07-02</lastmod>
+		<lastmod>2026-07-05</lastmod>
 		<changefreq>monthly</changefreq>
 		<priority>1.0</priority>
 		<image:image>
@@ -32,6 +32,10 @@
 		<image:image>
 			<image:loc>https://eden.emtech.cc/img/me/xiaoyu.webp</image:loc>
 			<image:title>贈圖（舊設定）</image:title>
+		</image:image>
+		<image:image>
+			<image:loc>https://eden.emtech.cc/img/me/SteveXMH.webp</image:loc>
+			<image:title>贈圖</image:title>
 		</image:image>
 		<image:image>
 			<image:loc>https://eden.emtech.cc/img/me/fursona.webp</image:loc>
